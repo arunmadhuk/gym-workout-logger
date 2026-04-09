@@ -1,40 +1,38 @@
-Project 7: Gym Workout Logger
-Description
+# Project 7: Gym Workout Logger
 
+## Description
 Users can log their workouts and track fitness progress over time.
-Objectives
 
-    Implement activity tracking
-    Store time-based records
-    Generate analytics reports
+## Objectives
+- Implement activity tracking
+- Store time-based records
+- Generate analytics reports
 
-Functional Requirements
-Workout Tracking
+## Functional Requirements
 
-    Create workout session
-    Add exercises
-    Record reps and weight
+### Workout Tracking
+- Create workout session
+- Add exercises
+- Record reps and weight
 
-Analytics
+### Analytics
+- Weekly progress
+- Personal best tracking
 
-    Weekly progress
-    Personal best tracking
+## Database Tables
+- users
+- exercises
+- workout_sessions
+- exercise_logs
 
-Database Tables
+## Example API Endpoints
 
-    users
-    exercises
-    workout_sessions
-    exercise_logs
+POST /workouts  
+GET /workouts  
+POST /workouts/{id}/exercise  
+GET /workouts/history  
 
-Example API Endpoints
-
-POST /workouts
-GET /workouts
-POST /workouts/{id}/exercise
-GET /workouts/history
-Deployment Requirements
-
-    PostgreSQL
-    Dockerized API
-    Cloud deployment
+## Deployment Requirements
+- PostgreSQL
+- Dockerized API
+- Cloud deployment
