@@ -18,6 +18,7 @@ get_env = os.environ.get
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+print(f"BASE_DIR: {BASE_DIR}")
 
 ENV = get_env("ENV", "dev")
 print(f"ENV: {ENV}")
@@ -33,8 +34,9 @@ DEBUG = get_env("DEBUG", "False")
 
 print(f"DEBUG: {DEBUG}")
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
+AUTH_USER_MODEL = 'gym_app.User'
 
 # Application definition
 
@@ -45,6 +47,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'gym_app',
 ]
 
 MIDDLEWARE = [
@@ -124,8 +127,12 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
+STATIC_URL = "static/"
+MEDIA_URL = "media/"
 
-STATIC_URL = 'static/'
+
+MEDIA_ROOT = os.path.join(os.path.dirname(BASE_DIR), "media")
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

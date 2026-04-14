@@ -1,0 +1,400 @@
+{%extends 'dashboard/index.html'%}
+{%block content %}
+{% load static %}
+
+<script src="{% static 'js/signup.js' %}"></script>
+
+<div class="col-8">
+  <div class="row mt-3">
+
+    <div class="signup-form col-10">
+
+      <form id="login_add_form" class="row g-3 needs-validation justify-content-center justify-content-sm-center 
+        justify-content-md-center justify-content-lg-center justify-content-xl-center justify-content-xxl-center"
+        novalidate>
+
+        {% csrf_token %}
+        <div class="container ">
+          <div id="alert_placeholder" class="container"></div>
+          <h2 class="text-center font-weight-bold my-2">Create New Login</h2>
+          <hr class="mb-1" />
+          <div class="row justify-content-center">
+            <!-- First Name -->
+            <div class="col-5 mt-2 position-relative">
+              <div class="form-floating">
+                <input type="text" class="form-control" id="first_name" placeholder="First Name"
+                  onfocusout="clear_fname_tooltip()" required>
+                <label for="first_name">First Name</label>
+                <div class="invalid-tooltip" id="fname_tooltip">
+                  Provide User's First Name.
+                </div>
+              </div>
+            </div>
+
+            <!-- Last Name -->
+            <div class="col-5 mt-2 position-relative">
+              <div class="form-floating">
+                <input type="text" class="form-control" id="last_name" onfocusout="check_first_and_last_name()"
+                  placeholder="Last Name" required>
+                <label for="last_name">Last Name</label>
+                <div class="invalid-tooltip" id="lname_tooltip">
+                  Provide User's Last Name.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row justify-content-center">
+            <!-- Contact Number -->
+            <div class="col-5 mt-3 position-relative">
+              <div class="form-floating">
+                <input type="tel" class="form-control" id="contact" required placeholder="+91xxxxxxxxxx"
+                  onfocusout="validate_mobile_number()">
+                <label for="contact">Mobile No +91-xxxxxxxxxx</label>
+                <div class="invalid-tooltip" id="contact_invalid">
+                  Provide a Mobile Number with country code.
+                </div>
+                <div class="valid-feedback" id="contact_valid">
+
+                </div>
+              </div>
+            </div>
+
+            <!-- email id -->
+            <div class="col-5 mt-3" position-relative>
+              <div class="form-floating">
+                <input type="email" class="form-control" id="email" placeholder="name@example.com" required
+                  onfocusout="validate_email()">
+                <label for="email">Email address</label>
+                <div class="invalid-tooltip" id="email_invalid">
+                  Provide User's e-Mail id.
+                </div>
+                <div class="valid-feedback" id="email_valid">
+
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="row justify-content-center">
+            <div class="col-5 mt-3 position-relative">
+              <div class="form-floating">
+                <select class="form-select" onchange="enable_user_group()" id="designation" required>
+
+                  {% for designation in designations %}
+
+                  <option id={{designation}}>{{designation}}</option>
+
+                  {% endfor %}
+                </select>
+                <label for="designation">Choose User Designation</label>
+                <div class="invalid-tooltip">
+                  Choose User Designation.
+                </div>
+              </div>
+            </div>
+
+            <div class="col-5 mt-3 position-relative">
+              <div class="form-floating">
+                <select class="form-select" onchange="suggest_username(); " id="user_group" required>
+
+                  {% for user_group in user_groups %}
+
+                  <option id={{user_group.id}}>{{user_group.name}}</option>
+
+                  {% endfor %}
+                </select>
+                <label for="user_group">Choose User Group</label>
+                <div class="invalid-tooltip">
+                  Choose User Group.
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row justify-content-center">
+            <div class="col-5 mt-4 float-start">
+              <label>Suggested User Name : <span id="suggested_username"></span></label>
+
+            </div>
+
+            <div class="col-5 mt-4 float-start">
+              <label>User ID : <span id="unique_id" placeholder="User ID"></label>
+
+            </div>
+          </div>
+
+          <div class="row justify-content-center">
+            <div class="col-5 mt-4 position-relative">
+              <div class="form-floating">
+                <input type="password" class="form-control" id="password1" placeholder="Password"
+                  onfocusout="checkPassword1()" required>
+
+                <label for="password1">Password</label>
+                <div class="invalid-tooltip" id="password1_tooltip">
+                  Your password must contain at least 8 characters
+                </div>
+              </div>
+            </div>
+
+            <div class="col-5 mt-4 position-relative">
+              <div class="form-floating">
+                <input type="password" class="form-control" id="password2" onfocusout="checkPassword()"
+                  placeholder="Password" required>
+
+                <label for="password2">Password Confirmation:</label>
+                <div class="invalid-tooltip" id="password2_tooltip">
+                  Enter the same password as before, for verification.
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row justify-content-center">
+
+            <div class="col-10 mt-4 position-relative">
+              <label for="chkbx_countries float-start">Select Acces to Countries:</label>
+              <div class="form-floating">
+
+                <div class="checkbox-group required d-flex flex-wrap mt-3" id="countries_group">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="" id="select_all">
+                    <label class="form-check-label" for="select_all">
+                      Select All
+                    </label>
+                  </div>
+                  {% for country in countries %}
+                  <div class="form-check mx-2">
+                    <input class="form-check-input" type="checkbox" value="{{ country.name }}" id="{{ country.name }}"
+                      name="countries_group">
+                    <label class="form-check-label" for="{{ country.name }}">
+                      {{ country.name }}
+                    </label>
+                  </div>
+                  {% endfor %}
+                </div>
+                <div class="invalid-tooltip" id="invalid_country">
+                  Choose atleast one Country for the user.
+                </div>
+              </div>
+
+            </div>
+          </div>
+          <div class="row justify-content-center">
+            <!-- Submit -->
+            <div class="col-8 mt-3 col-xxl-8 my-3 justify-content-center d-flex  mt-4">
+              <div class="enroll-btn">
+                <button type="button" class="btn btn-primary" id="signup-btn" onclick="formValidator()">Create Login
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script>
+  const toastLiveExample = document.getElementById('liveToast')
+  const toastBootstrap = bootstrap.Toast.getOrCreateInstance(toastLiveExample)
+  let countries_count = Number('{{countries_count}}');
+  let selected_color = '#198754'
+  let unselected_color = '#000000'
+  let red_color = '#dc3545'
+  // Change the color of label & checkbox for countries_group change event
+
+  $('input[name="countries_group"]').change(function (value) {
+    $('#invalid_country').hide()
+
+    if ($(this).prop('checked') === true) {
+      set_selected_color(this, selected_color)
+    }
+    else {
+      set_selected_color(this, unselected_color)
+    }
+
+    if ($('input[name="countries_group"]:checked').length === countries_count) {
+      $('#select_all').prop('checked', true)
+      set_selected_color("#select_all", selected_color)
+    }
+    else {
+      $('#select_all').prop('checked', false)
+      set_selected_color("#select_all", unselected_color)
+    }
+
+    if ($('input[name="countries_group"]:checked').length === 0) {
+      $('#invalid_country').show()
+    }
+  });
+
+  function set_selected_color(id, color) {
+    $(id).css("border-color", color)
+    $(id).next().css("color", color);
+  }
+  // Change color & group select/unselecte for select_all checkbox change event
+  $('#select_all').change(function () {
+    console.log(this.checked)
+    $('#invalid_country').hide()
+    if (this.checked === true) {
+      set_selected_color("#select_all", selected_color)
+      $("input[name='countries_group']").each(function () {
+        $(this).prop('checked', true);
+        set_selected_color(this, selected_color)
+      });
+    }
+    else if (this.checked === false) {
+      $('#invalid_country').show()
+
+      set_selected_color("#select_all", unselected_color)
+
+      $("input[name='countries_group']").each(function () {
+        $(this).prop('checked', false);
+        set_selected_color(this, unselected_color)
+      });
+    }
+
+  });
+
+  // Document ready events
+  jQuery(document).ready(function ($) {
+
+    $('.form-select').prop('selectedIndex', -1)
+    $('#user_group').attr('disabled', true);
+
+  });
+
+  // Form submit events
+  function formValidator() {
+    if ($('input[name="countries_group"]:checked').length > 0) {
+      var countries = [];
+      $('input[name="countries_group"]:checked').map(function () {
+        console.log($(this).val())
+        countries.push($(this).val());
+      });
+      console.log(countries)
+    }
+    else {
+      console.log("No County selected")
+      set_selected_color("#select_all", red_color)
+
+      $("input[name='countries_group']").each(function () {
+        set_selected_color(this, red_color)
+
+      });
+
+      $('#invalid_country').show()
+    }
+    console.log("form validation")
+
+    'use strict'
+
+    var forms = document.querySelectorAll('.needs-validation')
+
+    var validation = Array.prototype.filter.call(forms, function (form) {
+      if (!form.checkValidity()) {
+        event.preventDefault()
+        event.stopPropagation()
+      }
+      form.classList.add("was-validated");
+    });
+
+    let user_group = document.querySelector('#user_group');
+    let designation = document.querySelector('#designation');
+    let username = document.querySelector("#suggested_username");
+    let user_id_field = document.querySelector("#unique_id");
+    let password1 = document.querySelector("#password1");
+    let password2 = document.querySelector("#password2");
+    let contact = document.querySelector("#contact")
+    let email = document.querySelector("#email")
+
+    // If form valid then submit the data's
+    if (user_group.checkValidity() === true && password1.checkValidity() === true &&
+      password2.checkValidity() === true && designation.checkValidity() === true &&
+      contact.checkValidity() === true && email.checkValidity()) {
+      show_creating_gif()
+      let user_group = $('#user_group').find(":selected").text()
+      let designation = $("#designation").find(":selected").text()
+      let username = $('#suggested_username').html();
+      let first_name = $('#first_name').val()
+      let last_name = $('#last_name').val();
+      let unique_id = $('#unique_id').html();
+      let password1 = $('#password1').val();
+      let password2 = $('#password2').val();
+      let email = $('#email').val();
+      let contact = $('#contact').val();
+      console.log(user_group, designation, username, unique_id, password1, password2, contact, email)
+      $.post('', {
+        user_group: user_group,
+        designation: designation,
+        first_name: first_name,
+        last_name: last_name,
+        username: username,
+        email: email,
+        contact: contact,
+        unique_id: unique_id,
+        password1: password1,
+        password2: password2,
+        countries: countries,
+        'csrfmiddlewaretoken': '{{ csrf_token }}'
+      },
+        function (data) {
+
+          data = JSON.parse(data)
+          status = data.status
+          form_errors = data.errors
+          // console.log(JSON.parse(data))
+          $('#status-final').text('');
+          // if contact details exist
+          hide_ajax_loading()
+          if (data.status == 409) {
+
+            $('#modal-title').html('<i class="fas fa-1x text-danger fa-exclamation-circle"></i>' + '  ' + "<span style='font-size: 30px;'class='text-danger'> <b> Error </b> </span>")
+            $('#body-modal').html('User Login creation failed for ' + username);
+            var myModal = new bootstrap.Modal(document.getElementById('staticBackdrop'), {
+              keyboard: false
+            })
+            myModal.show()
+          }
+
+          else if (data.status == 417) {
+
+            var sub_ul = $('<ul/>');
+            error_keys = Object.keys(form_errors)
+
+            for (key in error_keys) {
+              error_key = error_keys[key]
+
+              errors = form_errors[error_key]
+
+              for (er in errors) {
+
+                var sub_li = $('<li/>').html(errors[er]);
+                sub_ul.append(sub_li);
+              }
+
+            }
+
+            $('#toast-body').append(sub_ul)
+            toastBootstrap.show()
+          }
+          else if (data.status == 200) {
+            console.log(username, data.status)
+            $('#modal-title').html('<i class="fas fa-1x fa-check-circle text-success"></i>' + '  ' + "<span style='font-size: 30px;'class='text-success'> <b> Success ! </b> </span>")
+            $('#body-modal').html('User Login created for ' + username);
+            var myModal = new bootstrap.Modal(document.getElementById('staticBackdrop'), {
+              keyboard: false
+            })
+            myModal.show()
+
+          }
+
+        });
+      return false;
+    }
+
+  }
+
+</script>
+{% endblock %}

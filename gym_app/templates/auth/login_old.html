@@ -1,0 +1,149 @@
+{%extends 'dashboard/index.html'%}
+{%load static%}
+{% block title %}Login{% endblock %}
+
+{% block content %}
+
+<div class="container mt-5 py-5">
+
+  <div class="col-8 offset-2 mx-auto mt-5">
+    <div id="alert_placeholder" class="container-fluid "></div>
+
+    <div class="row mt-5 justify-content-center">
+
+      <div class="col-6 ">
+        <img src="{%static 'images/drm_logo.png'%}" class="img-fluid" alt="">
+      </div>
+
+
+      <div id="login" class="col-5 justify-content-center">
+        <h2 class="font-weight-bold">Login</h2>
+        <hr class="mb-4" />
+        <form class="form-horizontal mb-5 needs-validation" id="login_form" name="LoginForm" method="post" novalidate>
+          {% csrf_token %}
+
+          <div class="container">
+
+            <div class="form-floating">
+              <input type="text" class="form-control" id="username" name="username" placeholder="User Name" required>
+              <label for="uname">User Name</label>
+              <div class="valid-tooltip" id="valid_uname">
+                Valid username.
+              </div>
+              <div class="invalid-tooltip" id="invalid_uname">
+                Please enter a valid username.
+              </div>
+            </div>
+
+            <div class="form-floating mt-4">
+              <input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
+              <label for="psw">Password</label>
+              <div class="invalid-tooltip" id="invalid_passwd">
+                Please provide a valid password.
+              </div>
+              <div class="valid-tooltip" id="valid_uname">
+                Valid password.
+              </div>
+            </div>
+
+            <div class="form-floating mt-3 d-flex justify-content-around">
+              <!-- <span class="psw mt-3"> <b>Forgot password?</b></span> -->
+              <a href="#" data-toggle="tooltip" id="myTooltip" data-delay='{"show":"0", "hide":"100"}'>
+                <button type="button" class="btn btn-primary" id="btn_login" onclick="form_validator()">Log
+                  In</button></a>
+            </div>
+
+            {% if code == 203 %}
+
+            <script type="text/javascript">
+              var state = "{{state}}";
+
+              showalert(state, "alert-danger");
+
+            </script>
+
+            {% endif %}
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+<script type="text/javascript">
+
+
+  function form_validator() {
+    console.log("form validator")
+
+    'use strict'
+
+    // Fetch all the forms we want to apply custom Bootstrap validation styles to
+    var forms = document.querySelectorAll('.needs-validation')
+
+    // Loop over them and prevent submission
+    var validation = Array.prototype.filter.call(forms, function (form) {
+      if (!form.checkValidity()) {
+        event.preventDefault()
+        event.stopPropagation()
+      }
+      form.classList.add("was-validated");
+    });
+    $(".valid-tooltip").hide()
+    let username = document.querySelector('#username');
+    let password = document.querySelector('#password');
+    if (username.checkValidity() == true && password.checkValidity() == true) {
+      sign_in_user()
+    }
+
+  }
+
+  function sign_in_user() {
+    show_validating_gif()
+    var login_success_url = "{% url 'home' %}"
+    event.preventDefault();
+    event.stopPropagation();
+    var username = ($('#username')).val();
+    var password = ($('#password')).val();
+    $.ajax({
+      url: "{% url 'userlogin' %}",
+      type: "POST",
+      data: {
+        'username': username,
+        'password': password,
+        'csrfmiddlewaretoken': '{{ csrf_token }}'
+      },
+      success: function (data) {
+
+        if (data['code'] === 401) {
+          message = "Login failed ! Try after sometime"
+          showalert(message, "alert-danger");
+        }
+        else if (data['code'] === 200) {
+          $(".valid-tooltip").show()
+          show_redirecting_gif()
+          location.href = login_success_url;
+        }
+        else if (data['code'] === 203) {
+
+          errors = data['errors']["__all__"]
+          message = errors
+          showalert(message, "alert-danger");
+
+          let box_shadow = '0 0 0 0.2rem rgba(220, 53, 69, 0.5)'
+
+          $('#login_form').removeClass('was-validated')
+          $('#username').removeClass('valid is-valid').addClass('is-invalid')
+          $(".invalid-tooltip").hide()
+          $('#password').removeClass('valid is-valid').addClass('is-invalid')
+          $('#btn_login').css({ 'box-shadow': box_shadow })
+
+        }
+
+      }
+    });
+  } 
+</script>
+{% endblock %}
