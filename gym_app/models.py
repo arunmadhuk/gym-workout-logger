@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager, PermissionsMixin
-
+from datetime import datetime, timedelta
 
 class UserManager(BaseUserManager):
     def create_user(self, email, password, full_name=None, **extra_fields):
@@ -58,6 +58,26 @@ class WorkoutSession(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def calculate_duration(self):
+        """Calculate duration in minutes from start_time and end_time"""
+        if self.start_time and self.end_time:
+            start_datetime = datetime.combine(self.session_date, self.start_time)
+            end_datetime = datetime.combine(self.session_date, self.end_time)
+            
+            # Handle overnight sessions
+            if end_datetime < start_datetime:
+                end_datetime += timedelta(days=1)
+            
+            duration = (end_datetime - start_datetime).total_seconds() / 60
+            return int(round(duration))
+        return None
+    
+    def save(self, *args, **kwargs):
+        """Auto-calculate duration before saving"""
+        if self.start_time and self.end_time:
+            self.duration_minutes = self.calculate_duration()
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return f"{self.user.full_name} - {self.session_date}"
     
@@ -90,7 +110,7 @@ class Exercise(models.Model):
     sets = models.PositiveIntegerField()
     reps = models.PositiveIntegerField()
     weight_kg = models.FloatField(null=True, blank=True)
-    duration_seconds = models.PositiveIntegerField(null=True, blank=True)
+    duration_minutes = models.PositiveIntegerField(null=True, blank=True)
     description = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -106,7 +126,7 @@ class ExerciseLog(models.Model):
     sets_completed = models.PositiveIntegerField()
     reps_completed = models.PositiveIntegerField()
     weight_kg = models.FloatField(null=True, blank=True)
-    duration_seconds = models.PositiveIntegerField(null=True, blank=True)
+    duration_minutes = models.PositiveIntegerField(null=True, blank=True)
     notes = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
