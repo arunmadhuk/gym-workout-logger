@@ -357,3 +357,186 @@ for data in test_exercise_logs_data:
     print(f"Created: {log} - Duration: {log.duration_minutes} minutes")
 
 print(f"\nSuccessfully created {created_count} exercise logs")
+
+
+
+from gym_app.models import User, ExerciseLog, WorkoutSession, Exercise
+
+# Assuming you have a user instance
+user = User.objects.get(user_id=3)
+
+workout_sessions = [
+    WorkoutSession.objects.create(user=user,session_date=date(2026, 4, 15),start_time=time(7, 0),end_time=time(7, 30),duration_minutes=30,calories_burned=120, notes="Morning yoga session"),
+    WorkoutSession.objects.create(
+        user=user,
+        session_date=date(2026, 4, 16),
+        start_time=time(18, 0),
+        end_time=time(18, 45),
+        duration_minutes=45,
+        calories_burned=180,
+        notes="Evening stretch"
+    ),
+    WorkoutSession.objects.create(
+        user=user,
+        session_date=date(2026, 4, 17),
+        start_time=time(8, 30),
+        end_time=time(9, 0),
+        duration_minutes=30,
+        calories_burned=110,
+        notes="Quick morning stretch"
+    ),
+]
+
+exercise_logs = []
+for i, session in enumerate(workout_sessions):
+    log = ExerciseLog.objects.create(
+        workout_session=session,
+        exercise=exercise,
+        sets_completed=3,  # 3 sets
+        reps_completed=1,  # Each set is 1 hold/stretch
+        weight_kg=None,    # No weight for yoga
+        duration_minutes=session.duration_minutes,
+        notes=f"Yoga stretch session {i+1} - focused on full body flexibility"
+    )
+    exercise_logs.append(log)
+
+print(exercise_logs)
+
+
+yoga_variations = [
+    {
+        'session_date': date(2026, 4, 18),
+        'start_time': time(7, 0),
+        'end_time': time(8, 0),
+        'duration': 60,
+        'calories': 250,
+        'sets': 4,
+        'reps': 1,
+        'notes': 'Power yoga - more intense'
+    },
+    {
+        'session_date': date(2026, 4, 19),
+        'start_time': time(20, 0),
+        'end_time': time(20, 30),
+        'duration': 30,
+        'calories': 100,
+        'sets': 2,
+        'reps': 1,
+        'notes': 'Gentle evening stretch'
+    },
+    {
+        'session_date': date(2026, 4, 20),
+        'start_time': time(6, 30),
+        'end_time': time(7, 15),
+        'duration': 45,
+        'calories': 190,
+        'sets': 3,
+        'reps': 2,
+        'notes': 'Morning flow with extra reps'
+    },
+]
+
+for var in yoga_variations:
+    session = WorkoutSession.objects.create(
+        user=user,
+        session_date=var['session_date'],
+        start_time=var['start_time'],
+        end_time=var['end_time'],
+        duration_minutes=var['duration'],
+        calories_burned=var['calories'],
+        notes=var['notes']
+    )
+    
+    ExerciseLog.objects.create(
+        workout_session=session,
+        exercise=exercise,
+        sets_completed=var['sets'],
+        reps_completed=var['reps'],
+        weight_kg=None,
+        duration_minutes=var['duration'],
+        notes=f"Yoga stretch: {var['notes']}"
+    )
+
+
+
+#for user 3
+
+from gym_app.models import User, ExerciseLog, WorkoutSession, Exercise
+from datetime import datetime, timezone
+from decimal import Decimal
+
+test_exercise_logs_data = [
+    {
+        "workout_session_id": 12,  # Yoga session
+        "exercise_id": 3,          # Yoga Stretch
+        "sets_completed": 1,
+        "reps_completed": 1,
+        "weight_kg": None,
+        "duration_minutes": 15,    # 15 minutes
+        "notes": "Focused on deep breathing",
+    },
+       {
+        "workout_session_id": 13,  # Yoga session
+        "exercise_id": 3,          # Yoga Stretch
+        "sets_completed": 1,
+        "reps_completed": 1,
+        "weight_kg": None,
+        "duration_minutes": 15,    # 15 minutes
+        "notes": "Focused on deep breathing",
+    },
+        {
+        "workout_session_id": 14,  # Yoga session
+        "exercise_id": 3,          # Yoga Stretch
+        "sets_completed": 1,
+        "reps_completed": 1,
+        "weight_kg": None,
+        "duration_minutes": 15,    # 15 minutes
+        "notes": "Focused on deep breathing",
+    },
+        {
+        "workout_session_id": 15,  # Yoga session
+        "exercise_id": 3,          # Yoga Stretch
+        "sets_completed": 1,
+        "reps_completed": 1,
+        "weight_kg": None,
+        "duration_minutes": 15,    # 15 minutes
+        "notes": "Focused on deep breathing",
+    },
+        {
+        "workout_session_id": 16,  # Yoga session
+        "exercise_id": 3,          # Yoga Stretch
+        "sets_completed": 1,
+        "reps_completed": 1,
+        "weight_kg": None,
+        "duration_minutes": 15,    # 15 minutes
+        "notes": "Focused on deep breathing",
+    },
+]
+
+# Verify sessions and exercises exist
+sessions = WorkoutSession.objects.filter(user_id=3)
+exercises = Exercise.objects.all()
+print(f"Sessions available: {sessions.count()}")
+print(f"Exercises available: {exercises.count()}")
+
+# Create exercise logs
+created_count = 0
+for data in test_exercise_logs_data:
+    # Remove auto-generated fields if present
+    data.pop('created_at', None)
+    data.pop('updated_at', None)
+    
+    # Get the actual objects
+    workout_session = WorkoutSession.objects.get(session_id=data.pop('workout_session_id'))
+    exercise = Exercise.objects.get(exercise_id=data.pop('exercise_id'))
+    
+    # Create the log
+    log = ExerciseLog.objects.create(
+        workout_session=workout_session,
+        exercise=exercise,
+        **data
+    )
+    created_count += 1
+    print(f"Created: {log} - Duration: {log.duration_minutes} minutes")
+
+print(f"\nSuccessfully created {created_count} exercise logs")
