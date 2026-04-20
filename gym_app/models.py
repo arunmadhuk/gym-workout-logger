@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from datetime import datetime, timedelta
 
+
 class UserManager(BaseUserManager):
     def create_user(self, email, password, full_name=None, **extra_fields):
         if not email:
@@ -9,14 +10,15 @@ class UserManager(BaseUserManager):
         if not password:
             raise ValueError("The password must be set")
         email = self.normalize_email(email)
-        print(f"User creation request received - email {email}, fullname- {full_name}, extra_fields -{extra_fields}")
+        print(
+            f"User creation request received - email {email}, fullname- {full_name}, extra_fields -{extra_fields}")
         user = self.model(email=email, full_name=full_name, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
         print(f"user {user} created succesfully")
         return user
 
-    def create_superuser(self, email, password,full_name=None, **extra_fields):
+    def create_superuser(self, email, password, full_name=None, **extra_fields):
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
 
@@ -25,9 +27,9 @@ class UserManager(BaseUserManager):
         if extra_fields.get("is_superuser") is not True:
             raise ValueError("Superuser must have is_superuser=True.")
         print(f"Superuser create request received for {email} , {full_name}")
-        return self.create_user(email, password,full_name or 'Admin' **extra_fields)
+        return self.create_user(email, password, full_name or 'Admin' ** extra_fields)
 
-    
+
 class User(AbstractBaseUser, PermissionsMixin):
     user_id = models.AutoField(primary_key=True)
     full_name = models.CharField(max_length=100)
@@ -61,17 +63,18 @@ class WorkoutSession(models.Model):
     def calculate_duration(self):
         """Calculate duration in minutes from start_time and end_time"""
         if self.start_time and self.end_time:
-            start_datetime = datetime.combine(self.session_date, self.start_time)
+            start_datetime = datetime.combine(
+                self.session_date, self.start_time)
             end_datetime = datetime.combine(self.session_date, self.end_time)
-            
+
             # Handle overnight sessions
             if end_datetime < start_datetime:
                 end_datetime += timedelta(days=1)
-            
+
             duration = (end_datetime - start_datetime).total_seconds() / 60
             return int(round(duration))
         return None
-    
+
     def save(self, *args, **kwargs):
         """Auto-calculate duration before saving"""
         if self.start_time and self.end_time:
@@ -80,7 +83,7 @@ class WorkoutSession(models.Model):
 
     def __str__(self):
         return f"{self.user.full_name} - {self.session_date}"
-    
+
 
 class Exercise(models.Model):
     EXERCISE_TYPE_CHOICES = [
@@ -104,8 +107,10 @@ class Exercise(models.Model):
     ]
     exercise_id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100)
-    exercise_type = models.CharField(max_length=20, choices=EXERCISE_TYPE_CHOICES)
-    equipment = models.CharField(max_length=20, choices=EQUIPMENT_CHOICES, null=True, blank=True)
+    exercise_type = models.CharField(
+        max_length=20, choices=EXERCISE_TYPE_CHOICES)
+    equipment = models.CharField(
+        max_length=20, choices=EQUIPMENT_CHOICES, null=True, blank=True)
     difficulty = models.CharField(max_length=20, choices=DIFFICULTY_CHOICES)
     sets = models.PositiveIntegerField()
     reps = models.PositiveIntegerField()
@@ -117,11 +122,12 @@ class Exercise(models.Model):
 
     def __str__(self):
         return f"{self.name} - {self.exercise_type}"
-    
+
 
 class ExerciseLog(models.Model):
     log_id = models.AutoField(primary_key=True)
-    workout_session = models.ForeignKey(WorkoutSession, on_delete=models.CASCADE)
+    workout_session = models.ForeignKey(
+        WorkoutSession, on_delete=models.CASCADE)
     exercise = models.ForeignKey(Exercise, on_delete=models.PROTECT)
     sets_completed = models.PositiveIntegerField()
     reps_completed = models.PositiveIntegerField()
@@ -133,4 +139,3 @@ class ExerciseLog(models.Model):
 
     def __str__(self):
         return f"{self.workout_session} - {self.exercise.name}"
-

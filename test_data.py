@@ -1,3 +1,11 @@
+from gym_app.models import User, ExerciseLog, WorkoutSession, Exercise
+from gym_app.models import ExerciseLog, WorkoutSession, Exercise
+from decimal import Decimal
+from datetime import datetime, timezone
+from django.contrib.auth.models import User
+from datetime import date, time
+from gym_app.models import WorkoutSession
+from datetime import date, time, timedelta
 test_exercises_data = [
     {
         "name": "Running",
@@ -101,7 +109,6 @@ test_exercises_data = [
     }
 ]
 
-from datetime import date, time, timedelta
 
 test_workout_sessions_data = [
     {
@@ -112,8 +119,8 @@ test_workout_sessions_data = [
         "duration_minutes": 60,
         "calories_burned": 450,
         "notes": "Morning cardio session - felt energetic",
-        
-       
+
+
     },
     {
         "user_id": 1,
@@ -123,8 +130,8 @@ test_workout_sessions_data = [
         "duration_minutes": 45,
         "calories_burned": 380,
         "notes": "Strength training - upper body focus",
-        
-       
+
+
     },
     {
         "user_id": 1,
@@ -134,8 +141,8 @@ test_workout_sessions_data = [
         "duration_minutes": 45,
         "calories_burned": 320,
         "notes": "Yoga and stretching",
-        
-       
+
+
     },
     {
         "user_id": 1,
@@ -145,8 +152,8 @@ test_workout_sessions_data = [
         "duration_minutes": 90,
         "calories_burned": 650,
         "notes": "Leg day - heavy squats and deadlifts",
-        
-       
+
+
     },
     {
         "user_id": 1,
@@ -156,8 +163,8 @@ test_workout_sessions_data = [
         "duration_minutes": 30,
         "calories_burned": 250,
         "notes": "Quick HIIT session",
-        
-       
+
+
     },
     {
         "user_id": 1,
@@ -167,8 +174,8 @@ test_workout_sessions_data = [
         "duration_minutes": 60,
         "calories_burned": 500,
         "notes": "Full body workout",
-        
-       
+
+
     },
     {
         "user_id": 1,
@@ -178,8 +185,8 @@ test_workout_sessions_data = [
         "duration_minutes": 45,
         "calories_burned": 350,
         "notes": "Core workout and light cardio",
-        
-       
+
+
     },
     {
         "user_id": 1,
@@ -189,8 +196,8 @@ test_workout_sessions_data = [
         "duration_minutes": 90,
         "calories_burned": 580,
         "notes": "Long run day",
-        
-       
+
+
     },
     {
         "user_id": 1,
@@ -200,8 +207,8 @@ test_workout_sessions_data = [
         "duration_minutes": 30,
         "calories_burned": 200,
         "notes": "Recovery session - light stretching",
-        
-       
+
+
     },
     {
         "user_id": 1,
@@ -211,16 +218,12 @@ test_workout_sessions_data = [
         "duration_minutes": 75,
         "calories_burned": None,  # Not tracked
         "notes": "Swimming session",
-        
-       
+
+
     }
 ]
 
 
-from gym_app.models import WorkoutSession
-from datetime import date, time
-
-from django.contrib.auth.models import User
 user = User.objects.get(id=1)
 
 for data in test_workout_sessions_data:
@@ -228,9 +231,6 @@ for data in test_workout_sessions_data:
     session = WorkoutSession.objects.create(**data)
     print(f"Created: {session}")
 
-
-from datetime import datetime, timezone
-from decimal import Decimal
 
 test_exercise_logs_data = [
     # Cardio logs
@@ -316,7 +316,7 @@ test_exercise_logs_data = [
         "notes": "Good warmup",
     },
     {
-        "workout_session_id": 10, # Swimming session
+        "workout_session_id": 10,  # Swimming session
         "exercise_id": 10,         # Stationary Bike
         "sets_completed": 1,
         "reps_completed": 1,
@@ -326,9 +326,6 @@ test_exercise_logs_data = [
     }
 ]
 
-
-
-from gym_app.models import ExerciseLog, WorkoutSession, Exercise
 
 # Verify sessions and exercises exist
 sessions = WorkoutSession.objects.filter(user_id=1)
@@ -342,11 +339,12 @@ for data in test_exercise_logs_data:
     # Remove auto-generated fields if present
     data.pop('created_at', None)
     data.pop('updated_at', None)
-    
+
     # Get the actual objects
-    workout_session = WorkoutSession.objects.get(session_id=data.pop('workout_session_id'))
+    workout_session = WorkoutSession.objects.get(
+        session_id=data.pop('workout_session_id'))
     exercise = Exercise.objects.get(exercise_id=data.pop('exercise_id'))
-    
+
     # Create the log
     log = ExerciseLog.objects.create(
         workout_session=workout_session,
@@ -359,14 +357,12 @@ for data in test_exercise_logs_data:
 print(f"\nSuccessfully created {created_count} exercise logs")
 
 
-
-from gym_app.models import User, ExerciseLog, WorkoutSession, Exercise
-
 # Assuming you have a user instance
 user = User.objects.get(user_id=3)
 
 workout_sessions = [
-    WorkoutSession.objects.create(user=user,session_date=date(2026, 4, 15),start_time=time(7, 0),end_time=time(7, 30),duration_minutes=30,calories_burned=120, notes="Morning yoga session"),
+    WorkoutSession.objects.create(user=user, session_date=date(2026, 4, 15), start_time=time(
+        7, 0), end_time=time(7, 30), duration_minutes=30, calories_burned=120, notes="Morning yoga session"),
     WorkoutSession.objects.create(
         user=user,
         session_date=date(2026, 4, 16),
@@ -446,7 +442,7 @@ for var in yoga_variations:
         calories_burned=var['calories'],
         notes=var['notes']
     )
-    
+
     ExerciseLog.objects.create(
         workout_session=session,
         exercise=exercise,
@@ -458,12 +454,8 @@ for var in yoga_variations:
     )
 
 
+# for user 3
 
-#for user 3
-
-from gym_app.models import User, ExerciseLog, WorkoutSession, Exercise
-from datetime import datetime, timezone
-from decimal import Decimal
 
 test_exercise_logs_data = [
     {
@@ -475,7 +467,7 @@ test_exercise_logs_data = [
         "duration_minutes": 15,    # 15 minutes
         "notes": "Focused on deep breathing",
     },
-       {
+    {
         "workout_session_id": 13,  # Yoga session
         "exercise_id": 3,          # Yoga Stretch
         "sets_completed": 1,
@@ -484,7 +476,7 @@ test_exercise_logs_data = [
         "duration_minutes": 15,    # 15 minutes
         "notes": "Focused on deep breathing",
     },
-        {
+    {
         "workout_session_id": 14,  # Yoga session
         "exercise_id": 3,          # Yoga Stretch
         "sets_completed": 1,
@@ -493,7 +485,7 @@ test_exercise_logs_data = [
         "duration_minutes": 15,    # 15 minutes
         "notes": "Focused on deep breathing",
     },
-        {
+    {
         "workout_session_id": 15,  # Yoga session
         "exercise_id": 3,          # Yoga Stretch
         "sets_completed": 1,
@@ -502,7 +494,7 @@ test_exercise_logs_data = [
         "duration_minutes": 15,    # 15 minutes
         "notes": "Focused on deep breathing",
     },
-        {
+    {
         "workout_session_id": 16,  # Yoga session
         "exercise_id": 3,          # Yoga Stretch
         "sets_completed": 1,
@@ -525,11 +517,12 @@ for data in test_exercise_logs_data:
     # Remove auto-generated fields if present
     data.pop('created_at', None)
     data.pop('updated_at', None)
-    
+
     # Get the actual objects
-    workout_session = WorkoutSession.objects.get(session_id=data.pop('workout_session_id'))
+    workout_session = WorkoutSession.objects.get(
+        session_id=data.pop('workout_session_id'))
     exercise = Exercise.objects.get(exercise_id=data.pop('exercise_id'))
-    
+
     # Create the log
     log = ExerciseLog.objects.create(
         workout_session=workout_session,

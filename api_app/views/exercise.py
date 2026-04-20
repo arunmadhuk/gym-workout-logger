@@ -23,51 +23,56 @@ class ExerciseAPIView(APIView):
     def get(self, request, exercise_id=None):
         context = {}
         if exercise_id:
-            exercise = Exercise.objects.get(exercise_id = exercise_id)
+            exercise = Exercise.objects.get(exercise_id=exercise_id)
             print(f"Exercise request of {exercise_id} is {exercise}")
             context['exercise'] = exercise
-        
+
         print(f"get request - {context}")
-        return Response(context, status=200) 
+        return Response(context, status=200)
 
     def post(self, request):
         print(f"post request received - {request}")
         return Response({}, status=201)
-    
+
+
 class UserExerciseLogsAPIView(ListAPIView):
     serializer_class = ExerciseLogSerializer
     pagination_class = ExercisePagination
 
-    def get(self,request, user_id=None, session_date=None):
-        print(f"get request received for user exercise logs - {user_id} {request.query_params}")
+    def get(self, request, user_id=None, session_date=None):
+        print(
+            f"get request received for user exercise logs - {user_id} {request.query_params}")
         if not user_id:
             return Response(
-                {'error': 'User ID is required'}, 
+                {'error': 'User ID is required'},
                 status=status.HTTP_400_BAD_REQUEST
             )
         if User.objects.filter(user_id=user_id).exists() is False:
             return Response(
-                {'error': 'User not found'}, 
+                {'error': 'User not found'},
                 status=status.HTTP_404_NOT_FOUND
             )
-        
+
         if WorkoutSession.objects.filter(user__user_id=user_id).exists() is False:
             return Response(
-                {'error': 'No workout sessions found for the user'}, 
+                {'error': 'No workout sessions found for the user'},
                 status=status.HTTP_404_NOT_FOUND
             )
-        
-        exercise_log_qs = ExerciseLog.objects.filter(workout_session__user_id=user_id).order_by('-created_at')
+
+        exercise_log_qs = ExerciseLog.objects.filter(
+            workout_session__user_id=user_id).order_by('-created_at')
         print(f"Initial exercise log queryset - {exercise_log_qs}")
 
         if session_date:
             print(f"Filtering exercise logs for session date - {session_date}")
-            exercise_log_qs = ExerciseLog.objects.filter(workout_session__user_id=user_id, workout_session__session_date=session_date).order_by('-created_at')
+            exercise_log_qs = ExerciseLog.objects.filter(
+                workout_session__user_id=user_id, workout_session__session_date=session_date).order_by('-created_at')
 
         print(f"Filtered exercise log queryset - {exercise_log_qs}")
 
         paginator = self.pagination_class()
-        paginated_exercise_log = paginator.paginate_queryset(exercise_log_qs, request)
+        paginated_exercise_log = paginator.paginate_queryset(
+            exercise_log_qs, request)
         serializer = self.get_serializer(paginated_exercise_log, many=True)
 
         return Response({
@@ -78,26 +83,29 @@ class UserExerciseLogsAPIView(ListAPIView):
             'next': paginator.get_next_link(),
             'previous': paginator.get_previous_link(),
         }, status=status.HTTP_200_OK)
-    
+
 
 class DatewiseExerciseLogsAPIView(ListAPIView):
     serializer_class = ExerciseLogSerializer
     pagination_class = ExercisePagination
 
-    def get(self,request, session_date=None):
-        print(f"get request received for user exercise logs - {session_date} {request.query_params}")
-        
+    def get(self, request, session_date=None):
+        print(
+            f"get request received for user exercise logs - {session_date} {request.query_params}")
+
         if WorkoutSession.objects.filter(session_date=session_date).exists() is False:
             return Response(
-                {'error': 'No workout sessions found for the specified date'}, 
+                {'error': 'No workout sessions found for the specified date'},
                 status=status.HTTP_404_NOT_FOUND
             )
-        
-        exercise_log_qs = ExerciseLog.objects.filter(workout_session__session_date=session_date).order_by('-created_at')
+
+        exercise_log_qs = ExerciseLog.objects.filter(workout_session__session_date=session_date).select_related(
+            'workout_session', 'exercise').order_by('-created_at')
         print(f"Initial exercise log queryset - {exercise_log_qs}")
 
         paginator = self.pagination_class()
-        paginated_exercise_log = paginator.paginate_queryset(exercise_log_qs, request)
+        paginated_exercise_log = paginator.paginate_queryset(
+            exercise_log_qs, request)
         serializer = self.get_serializer(paginated_exercise_log, many=True)
 
         return Response({
