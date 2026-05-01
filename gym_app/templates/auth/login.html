@@ -1,5 +1,5 @@
-{%extends 'dashboard/index.html'%}
-{%load static%}
+{% extends 'index.html' %}
+{% load static %}
 {% block title %}Login{% endblock %}
 
 {% block content %}
@@ -23,7 +23,7 @@
     <div class="row mt-5 justify-content-center">
 
       <div class="col-6 ">
-        <img src="{%static 'images/drm_logo.png'%}" class="img-fluid" alt="">
+        <img src="{%static 'img/logo.jpg'%}" class="img-fluid" alt="">
       </div>
 
 
@@ -36,13 +36,13 @@
           <div class="container">
 
             <div class="form-floating">
-              <input type="text" class="form-control" id="username" name="username" placeholder="User Name" required>
-              <label for="uname">User Name</label>
-              <div class="valid-tooltip" id="valid_uname">
-                Valid username.
+              <input type="email" class="form-control" id="email" name="email" placeholder="Email" required>
+              <label for="email">Email</label>
+              <div class="valid-tooltip" id="valid_email">
+                Valid email.
               </div>
-              <div class="invalid-tooltip" id="invalid_uname">
-                Please enter a valid username.
+              <div class="invalid-tooltip" id="invalid_email">
+                Please enter a valid email.
               </div>
             </div>
 
@@ -52,7 +52,7 @@
               <div class="invalid-tooltip" id="invalid_passwd">
                 Please provide a valid password.
               </div>
-              <div class="valid-tooltip" id="valid_uname">
+              <div class="valid-tooltip" id="valid_password">
                 Valid password.
               </div>
             </div>
@@ -64,16 +64,6 @@
                   In</button></a>
             </div>
 
-            {% if code == 203 %}
-
-            <script type="text/javascript">
-              var state = "{{state}}";
-
-              showalert(state, "alert-danger");
-
-            </script>
-
-            {% endif %}
           </div>
         </form>
       </div>
@@ -111,9 +101,9 @@
       form.classList.add("was-validated");
     });
     $(".valid-tooltip").hide()
-    let username = document.querySelector('#username');
+    let email = document.querySelector('#email');
     let password = document.querySelector('#password');
-    if (username.checkValidity() == true && password.checkValidity() == true) {
+    if (email.checkValidity() == true && password.checkValidity() == true) {
       sign_in_user()
     }
 
@@ -124,33 +114,31 @@
 
     event.preventDefault();
     event.stopPropagation();
-    var username = ($('#username')).val();
+    var email = ($('#email')).val();
     var password = ($('#password')).val();
     $.ajax({
-      url: "{% url 'userlogin' %}",
+      url: "{% url 'login' %}",
       type: "POST",
       data: {
-        'username': username,
+        'email': email,
         'password': password,
         'csrfmiddlewaretoken': '{{ csrf_token }}'
       },
       success: function (response) {
         if (response.message) { // Successful login
           console.log("Login successful:", response.message);
-          $('#username').addClass('valid is-valid');
+          $('#email').addClass('valid is-valid');
           $('#password').addClass('valid is-valid');
           $(".valid-tooltip").show();
           location.href = login_success_url;
         } else if (response.error) { // Invalid credentials
           console.log("Login failed:", response.error);
-          const message = "Invalid username or password. Please try again.";
-          showalert(message, "alert-danger");
-
+          const message = "Invalid email or password. Please try again.";
           const box_shadow = '0 0 0 0.2rem rgba(220, 53, 69, 0.5)';
           $('#login_form').removeClass('was-validated');
-          $('#username').removeClass('valid is-valid').addClass('is-invalid');
+          $('#email').removeClass('valid is-valid').addClass('is-invalid');
           $('#password').removeClass('valid is-valid').addClass('is-invalid');
-          $(".invalid-tooltip").hide();
+          $(".invalid-tooltip").show();
           $('#btn_login').css({ 'box-shadow': box_shadow });
         }
       },
@@ -166,12 +154,10 @@
           message = "An error occurred. Please try again later.";
         }
 
-        showalert(message, "alert-danger");
-
         $('#login_form').removeClass('was-validated');
-        $('#username').removeClass('valid is-valid').addClass('is-invalid');
+        $('#email').removeClass('valid is-valid').addClass('is-invalid');
         $('#password').removeClass('valid is-valid').addClass('is-invalid');
-        $(".invalid-tooltip").hide();
+        $(".invalid-tooltip").show();
         $('#btn_login').css({ 'box-shadow': box_shadow });
       }
     });

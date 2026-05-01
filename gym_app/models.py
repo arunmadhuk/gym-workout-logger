@@ -86,32 +86,30 @@ class WorkoutSession(models.Model):
 
 
 class Exercise(models.Model):
-    EXERCISE_TYPE_CHOICES = [
+    EXERCISE_TYPE = (
         ('cardio', 'Cardio'),
         ('strength', 'Strength'),
         ('flexibility', 'Flexibility'),
         ('balance', 'Balance'),
-    ]
-    EQUIPMENT_CHOICES = [
+    )
+    EQUIPMENT = (
         ('none', 'None'),
         ('dumbbells', 'Dumbbells'),
         ('barbell', 'Barbell'),
         ('kettlebell', 'Kettlebell'),
         ('resistance_bands', 'Resistance Bands'),
         ('machine', 'Machine'),
-    ]
-    DIFFICULTY_CHOICES = [
+    )
+    DIFFICULTY= (
         ('beginner', 'Beginner'),
         ('intermediate', 'Intermediate'),
         ('advanced', 'Advanced'),
-    ]
+    )
     exercise_id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100)
-    exercise_type = models.CharField(
-        max_length=20, choices=EXERCISE_TYPE_CHOICES)
-    equipment = models.CharField(
-        max_length=20, choices=EQUIPMENT_CHOICES, null=True, blank=True)
-    difficulty = models.CharField(max_length=20, choices=DIFFICULTY_CHOICES)
+    exercise_type = models.CharField(max_length=20,choices=EXERCISE_TYPE)
+    equipment = models.CharField(max_length=20, choices=EQUIPMENT, null=True, blank=True)
+    difficulty = models.CharField(max_length=20, choices=DIFFICULTY)
     sets = models.PositiveIntegerField()
     reps = models.PositiveIntegerField()
     weight_kg = models.FloatField(null=True, blank=True)
