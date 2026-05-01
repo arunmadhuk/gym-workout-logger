@@ -22,33 +22,28 @@
     {% if title%}
     <title>{{title}}</title>
     {% else%}
-    <title> DRM </title>
-    {%endif%}
+    <title> Gym Logger </title>
+    {% endif %}
+
 </head>
 
 <body>
 
-    {% include 'includes/header.html' %}
+    {% include 'includes/navbar.html' %}
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 
 
-    <div class="container-fluid">
+    <div class="container">
 
         <div class="row">
 
-
             {% block content %}
             {% endblock content %}
-
+   
         </div>
 
-
-
-        <div id="ajax_loading" class="LoadingGif">
-        </div>
-
-        <!-- modal Dialog box -->
+    <!-- modal Dialog box -->
         <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
             aria-labelledby="modal-title" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
@@ -72,7 +67,7 @@
         <div class="toast-container position-fixed bottom-0 end-0 p-3" id="toast-container">
             <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
                 <div class="toast-header bg-secondary " id="toast_header">
-                    <img src="{%static 'img/logo.jpg'%}" class="rounded me-2" style="height: 10%; width: 10%;"
+                    <img src="{%static 'img/logo.png'%}" class="rounded me-2" style="height: 10%; width: 10%;"
                         alt="...">
                     <strong class="me-auto">Errors in Form</strong>
                     <small id="toast_time"></small>
@@ -84,6 +79,12 @@
             </div>
         </div>
     </div>
+
+
+     <footer class=" text-center text-dark mt-2 p-2">
+    
+            &copy; {{ current_year }} Gym Workout Logger. All rights reserved.
+    </footer>
 </body>
 
 <script>
@@ -95,36 +96,6 @@
         $("#ajax_loading").show()
 
     });
-
-
-    setInterval(show_time, 1000);
-
-    function show_time() {
-        document.getElementById("date-time").innerHTML = formatAMPM();
-    }
-
-
-    function formatAMPM() {
-        var d = new Date(),
-            minutes = d.getMinutes().toString().length == 1 ? '0' + d.getMinutes() : d.getMinutes(),
-            hours = d.getHours().toString().length == 1 ? '0' + d.getHours() : d.getHours(),
-            ampm = d.getHours() >= 12 ? 'pm' : 'am',
-            months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-            days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-        if (hours > 12) {
-            hours -= 12;
-            ampm = "PM";
-        }
-        if (hours == 0) {
-            hours = 12;
-            ampm = "AM";
-        }
-
-        hours = hours < 10 ? "0" + hours : hours
-        // console.log(hours, minutes, ampm)
-        return days[d.getDay()] + ", " + months[d.getMonth()] + ' ' + d.getDate() + ' ' + d.getFullYear() + ' ' + hours + ':' + minutes + ' ' + ampm;
-    }
-
 
 </script>
 

@@ -207,7 +207,7 @@ window.form_validator = function(event) {
                     ", Duration: " + duration_minutes_val);
         
         $.ajax({
-            url: "{% url 'create-exercise' %}",
+            url: "{% url 'exercise-create' %}",
             type: "POST",
             data: {
                 'name': exercise_name_val,

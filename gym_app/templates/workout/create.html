@@ -172,7 +172,7 @@ function validateTime() {
 
         console.log("Session Date : "+ session_date+", Start Time : "+ start_time+" , End Time : "+end_time)
         $.ajax({
-        url: "{% url 'create-workout-session' %}",
+        url: "{% url 'workout-session-create' %}",
         type: "POST",
         data: {
             'session_date': session_date,

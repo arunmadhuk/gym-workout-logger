@@ -34,7 +34,7 @@ def create_exercise(request):
         if not Exercise.objects.filter(exercise_type=data['exercise_type'], equipment=data['equipment'], difficulty=data['difficulty']).exists():
             form = ExerciseForm(data)
             if form.is_valid():
-                # form.save()
+                form.save()
                 print("Form is valid. Exercise would be saved to the database.")
             else:
                 print("Form is invalid. Errors:")
@@ -79,7 +79,7 @@ def exercise_log_create(request):
         if form.is_valid():
             exercise_log = form.save()
             messages.success(request, f'Exercise log for {exercise_log.exercise.name} created successfully!')
-            return redirect('exercise-log-list')
+            return redirect('exercise-logs-list')
     else:
         form = ExerciseLogForm()
     

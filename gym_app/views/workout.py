@@ -27,7 +27,7 @@ def create_workout_session(request):
         if not WorkoutSession.objects.filter(user=user, session_date=data['session_date'], start_time=data['start_time'], end_time=data['end_time']).exists():
             form = WorkoutForm(data)
             if form.is_valid():
-                # form.save()
+                form.save()
                 print("Form is valid. Workout session would be saved to the database.")
             else:
                 print("Form is invalid. Errors:")

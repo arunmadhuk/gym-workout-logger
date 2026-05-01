@@ -1,10 +1,499 @@
 {% extends 'index.html' %}
 {% load static %}
 
+{% block title %}Fitness Dashboard{% endblock %}
+
 {% block content %}
-<div class="col-md-10 col-10 mt-2 text-center">
-    <h1 class="mt-5">DRM Home Page</h1>
-    <img src="{%static 'img/under_construction.png'%}" style="max-width: 50%; height: 50%; " class="img-fluid">
-    <!-- <a href="https://storyset.com/online">Online illustrations by Storyset</a> -->
+<div class="container mt-4">
+    <!-- Welcome Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-gradient-primary text-white shadow">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h2 class="mb-0">
+                                <i class="bi bi-graph-up"></i> Welcome back, {{ user.username }}!
+                            </h2>
+                            <p class="mb-0 mt-2">
+                                <i class="bi bi-calendar"></i> {{ current_date|date:"l, F j, Y" }}
+                            </p>
+                        </div>
+                        <div class="text-end">
+                            <h1 class="display-4 mb-0">{{ total_workouts }}</h1>
+                            <p class="mb-0">Total Workouts</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                <i class="bi bi-activity"></i> Total Exercises
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_exercises }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-dumbbell fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                <i class="bi bi-repeat"></i> Total Sets
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_sets }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-arrow-repeat fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                <i class="bi bi-trophy"></i> Total Reps
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_reps }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-graph-up fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                <i class="bi bi-graph-up"></i> Volume Lifted (kg)
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_volume|floatformat:0 }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-calculator fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row mb-4">
+        <div class="col-lg-8 mb-4">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-graph-up"></i> Workout Progress (Last 7 Days)
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="workoutChart" height="200" style="max-height: 200px;"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-pie-chart"></i> Exercise Distribution
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="exerciseTypeChart" height="200" style="max-height: 200px;"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity and Top Exercises -->
+    <div class="row">
+        <div class="col-lg-7 mb-4">
+            <div class="card shadow">
+                <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="bi bi-clock-history"></i> Recent Exercise Logs
+                    </h5>
+                    <a href="{% url 'exercise-logs-list' %}" class="btn btn-sm btn-light">
+                        View All <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if recent_logs %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Exercise</th>
+                                        <th>Sets × Reps</th>
+                                        <th>Weight</th>
+                                        <th>Volume</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for log in recent_logs %}
+                                    <tr>
+                                        <td>{{ log.created_at|date:"M d, H:i" }}</td>
+                                        <td>
+                                            <strong>{{ log.exercise.name }}</strong>
+                                            {% if log.notes %}
+                                                <i class="bi bi-chat-dots" data-bs-toggle="tooltip" title="{{ log.notes }}"></i>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ log.sets_completed }} × {{ log.reps_completed }}</td>
+                                        <td>{% if log.weight_kg %}{{ log.weight_kg }} kg{% else %}-{% endif %}</td>
+                                        <td>
+                                            {% if log.weight_kg %}
+                                                {{ log.sets_completed|floatformat:0|add:log.reps_completed|floatformat:0|add:log.weight_kg|floatformat:0 }} kg
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="bi bi-emoji-frown" style="font-size: 48px;"></i>
+                            <p class="mt-3">No exercise logs yet. Start your fitness journey!</p>
+                            <a href="{% url 'exercise-logs-create' %}" class="btn btn-primary">
+                                <i class="bi bi-plus-circle"></i> Add Your First Log
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5 mb-4">
+            <div class="card shadow">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">
+                        <i class="bi bi-trophy"></i> Most Performed Exercises
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if top_exercises %}
+                        <div class="list-group">
+                            {% for exercise in top_exercises %}
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <strong>{{ exercise.name }}</strong>
+                                            <br>
+                                            <small class="text-muted">{{ exercise.count }} times performed</small>
+                                        </div>
+                                        <span class="badge bg-primary rounded-pill">
+                                            {{ exercise.total_sets }} sets
+                                        </span>
+                                    </div>
+                                    <div class="progress mt-2" style="height: 5px;">
+                                        <div class="progress-bar" style="width: {{ exercise.percentage }}%"></div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-center text-muted">No data available</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Quick Stats Card -->
+            <div class="card shadow mt-4">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-star"></i> Quick Stats
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <div class="text-center">
+                                <h3 class="mb-0">{{ average_sets_per_workout|floatformat:1 }}</h3>
+                                <small class="text-muted">Avg Sets/Workout</small>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="text-center">
+                                <h3 class="mb-0">{{ average_reps_per_set|floatformat:1 }}</h3>
+                                <small class="text-muted">Avg Reps/Set</small>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="text-center">
+                                <h3 class="mb-0">{{ most_active_day }}</h3>
+                                <small class="text-muted">Most Active Day</small>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="text-center">
+                                <h3 class="mb-0">{{ total_duration }} min</h3>
+                                <small class="text-muted">Total Duration</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Weekly Goals Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-calendar-check"></i> Weekly Progress
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-2 col-6 mb-3">
+                            <h6>Mon</h6>
+                            <div class="progress-circle" data-value="{{ weekly_data.Monday|default:0 }}">
+                                <span class="progress-value">{{ weekly_data.Monday|default:0 }}</span>
+                            </div>
+                            <small class="text-muted">exercises</small>
+                        </div>
+                        <div class="col-md-2 col-6 mb-3">
+                            <h6>Tue</h6>
+                            <div class="progress-circle" data-value="{{ weekly_data.Tuesday|default:0 }}">
+                                <span class="progress-value">{{ weekly_data.Tuesday|default:0 }}</span>
+                            </div>
+                            <small class="text-muted">exercises</small>
+                        </div>
+                        <div class="col-md-2 col-6 mb-3">
+                            <h6>Wed</h6>
+                            <div class="progress-circle" data-value="{{ weekly_data.Wednesday|default:0 }}">
+                                <span class="progress-value">{{ weekly_data.Wednesday|default:0 }}</span>
+                            </div>
+                            <small class="text-muted">exercises</small>
+                        </div>
+                        <div class="col-md-2 col-6 mb-3">
+                            <h6>Thu</h6>
+                            <div class="progress-circle" data-value="{{ weekly_data.Thursday|default:0 }}">
+                                <span class="progress-value">{{ weekly_data.Thursday|default:0 }}</span>
+                            </div>
+                            <small class="text-muted">exercises</small>
+                        </div>
+                        <div class="col-md-2 col-6 mb-3">
+                            <h6>Fri</h6>
+                            <div class="progress-circle" data-value="{{ weekly_data.Friday|default:0 }}">
+                                <span class="progress-value">{{ weekly_data.Friday|default:0 }}</span>
+                            </div>
+                            <small class="text-muted">exercises</small>
+                        </div>
+                        <div class="col-md-2 col-6 mb-3">
+                            <h6>Weekend</h6>
+                            <div class="progress-circle" data-value="{{ weekly_data.Weekend|default:0 }}">
+                                <span class="progress-value">{{ weekly_data.Weekend|default:0 }}</span>
+                            </div>
+                            <small class="text-muted">exercises</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
-{% endblock content %}
+
+<!-- Chart.js Library -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    // Workout Progress Chart
+    const workoutCtx = document.getElementById('workoutChart').getContext('2d');
+    const workoutChart = new Chart(workoutCtx, {
+        type: 'line',
+        data: {
+            labels: {{ chart_labels|safe }},
+            datasets: [{
+                label: 'Exercises Completed',
+                data: {{ chart_data|safe }},
+                borderColor: 'rgb(59, 130, 246)',
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                tension: 0.1,
+                fill: true
+            }, {
+                label: 'Total Volume (kg)',
+                data: {{ volume_data|safe }},
+                borderColor: 'rgb(34, 197, 94)',
+                backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                tension: 0.1,
+                fill: true,
+                yAxisID: 'y1'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Number of Exercises'
+                    }
+                },
+                y1: {
+                    position: 'right',
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Volume (kg)'
+                    },
+                    grid: {
+                        drawOnChartArea: false,
+                    }
+                }
+            }
+        }
+    });
+
+    // Exercise Type Distribution Chart
+    const typeCtx = document.getElementById('exerciseTypeChart').getContext('2d');
+    const typeChart = new Chart(typeCtx, {
+        type: 'doughnut',
+        data: {
+            labels: {{ exercise_type_labels|safe }},
+            datasets: [{
+                data: {{ exercise_type_data|safe }},
+                backgroundColor: [
+                    'rgb(59, 130, 246)',
+                    'rgb(34, 197, 94)',
+                    'rgb(234, 179, 8)',
+                    'rgb(239, 68, 68)',
+                    'rgb(168, 85, 247)',
+                    'rgb(236, 72, 153)'
+                ],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                }
+            }
+        }
+    });
+
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    });
+
+    // Simple progress circles (can be enhanced with actual chart library)
+    document.querySelectorAll('.progress-circle').forEach(circle => {
+        const value = parseInt(circle.dataset.value) || 0;
+        const maxValue = 10; // Set your weekly goal
+        const percentage = (value / maxValue) * 100;
+        
+        // Add visual styling
+        circle.style.position = 'relative';
+        circle.style.width = '80px';
+        circle.style.height = '80px';
+        circle.style.margin = '0 auto';
+        circle.style.borderRadius = '50%';
+        circle.style.background = `conic-gradient(#3b82f6 ${percentage}%, #e5e7eb ${percentage}%)`;
+        circle.style.display = 'flex';
+        circle.style.alignItems = 'center';
+        circle.style.justifyContent = 'center';
+        
+        const valueSpan = circle.querySelector('.progress-value');
+        if (valueSpan) {
+            valueSpan.style.position = 'relative';
+            valueSpan.style.zIndex = '1';
+            valueSpan.style.fontSize = '24px';
+            valueSpan.style.fontWeight = 'bold';
+        }
+        
+        // Add inner white circle
+        const innerCircle = document.createElement('div');
+        innerCircle.style.position = 'absolute';
+        innerCircle.style.width = '65px';
+        innerCircle.style.height = '65px';
+        innerCircle.style.borderRadius = '50%';
+        innerCircle.style.backgroundColor = 'white';
+        innerCircle.style.zIndex = '0';
+        circle.insertBefore(innerCircle, circle.firstChild);
+    });
+</script>
+
+<style>
+    .border-left-primary {
+        border-left: 4px solid #3b82f6;
+    }
+    .border-left-success {
+        border-left: 4px solid #22c55e;
+    }
+    .border-left-info {
+        border-left: 4px solid #06b6d4;
+    }
+    .border-left-warning {
+        border-left: 4px solid #eab308;
+    }
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    .card {
+        border-radius: 10px;
+        border: none;
+    }
+    .shadow {
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+    }
+    .table > :not(caption) > * > * {
+        padding: 0.75rem;
+    }
+    .progress-circle {
+        transition: all 0.3s ease;
+    }
+    .progress-circle:hover {
+        transform: scale(1.05);
+    }
+</style>
+{% endblock %}

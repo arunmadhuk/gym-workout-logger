@@ -32,6 +32,7 @@ def user_login(request):
 def user_logout(request):
     print("Logout view called")
     print(f"Request : {request}")
+    logout(request)
     template_name = 'auth/logout.html'
     context = {'title': 'Logout'}
     return render(request, template_name, context)
