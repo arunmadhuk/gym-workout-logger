@@ -52,6 +52,43 @@ def create_exercise(request):
         context['message'] = 'Exercise created successfully!'
     return render(request, template_name, context)
 
+@login_required
+def view_exercise(request, exercise_id):
+    exercise = Exercise.objects.filter(id=exercise_id).first()
+    if not exercise:
+        messages.error(request, 'Exercise not found.')
+        return redirect('exercise-list')
+    
+    context = {
+        'exercise': exercise,
+        'title': f'Exercise Detail - {exercise.exercise_type}'
+    }
+    return render(request, 'exercise/exercise_detail.html', context)
+
+@login_required
+def edit_exercise(request, exercise_id):
+    exercise = Exercise.objects.filter(exercise_id=exercise_id).first()
+    if not exercise:
+        messages.error(request, 'Exercise not found.')
+        return redirect('exercise-list')
+    
+    template_name = 'exercise/edit.html'
+    context = {'title': 'Edit Exercise', 'button_text': 'Update Exercise', 'button_color': 'warning'}
+    form = ExerciseForm(instance=exercise)
+    context['form'] = form
+
+    if request.method == 'POST':
+        form = ExerciseForm(request.POST, instance=exercise)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Exercise updated successfully!')
+            return redirect('exercise-list')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+            context['form'] = form
+            return render(request, template_name, context)
+
+    return render(request, template_name, context)
 
 @login_required
 def exercise_list(request):
@@ -75,13 +112,13 @@ def exercise_log_list(request):
 @login_required
 def exercise_log_create(request):
     if request.method == 'POST':
-        form = ExerciseLogForm(request.POST)
+        form = ExerciseLogForm(request.POST, user=request.user)
         if form.is_valid():
             exercise_log = form.save()
             messages.success(request, f'Exercise log for {exercise_log.exercise.name} created successfully!')
             return redirect('exercise-logs-list')
     else:
-        form = ExerciseLogForm()
+        form = ExerciseLogForm(user=request.user)
     
     context = {
         'form': form,
@@ -90,3 +127,16 @@ def exercise_log_create(request):
         'button_color': 'primary'
     }
     return render(request, 'exercise/exercise_log_form.html', context)
+
+
+def exercise_log_detail(request, log_id):
+    exercise_log = ExerciseLog.objects.filter(id=log_id, workout_session__user=request.user).select_related('workout_session', 'exercise').first()
+    if not exercise_log:
+        messages.error(request, 'Exercise log not found.')
+        return redirect('exercise-logs-list')
+    
+    context = {
+        'exercise_log': exercise_log,
+        'title': f'Exercise Log Detail - {exercise_log.exercise.name}'
+    }
+    return render(request, 'exercise/exercise_log_detail.html', context)

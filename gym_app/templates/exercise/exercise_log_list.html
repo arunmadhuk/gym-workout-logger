@@ -4,6 +4,13 @@
 {% block title %}Exercise Logs{% endblock %}
 
 {% block content %}
+
+<!-- DataTables CSS -->
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/responsive/2.4.1/css/responsive.bootstrap5.min.css">
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/2.3.6/css/buttons.bootstrap5.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
 <div class="container mt-4">
     <div class="card shadow">
         <div class="card-header bg-primary text-white">
@@ -21,26 +28,28 @@
                     <table class="table table-hover">
                         <thead class="table-dark">
                             <tr>
-                                <th>Workout Session</th>
-                                <th>Exercise</th>
+                                <th>Date</th>
+                                <th>Exercise Name</th>
+                                <th>Session Time</th>
+                                <th>Duration</th>
                                 <th>Sets</th>
                                 <th>Reps</th>
                                 <th>Weight (kg)</th>
-                                <th>Duration</th>
-                                <th>Date</th>
+                                <th>Distance (km)</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for log in exercise_logs %}
                             <tr>
-                                <td>{{ log.workout_session }}</td>
+                                <td>{{ log.workout_session.session_date }}</td>
                                 <td>{{ log.exercise.name }}</td>
-                                <td>{{ log.sets_completed }}</td>
-                                <td>{{ log.reps_completed }}</td>
+                                <td>{{ log.workout_session.start_time|time:"h:i A" }} - {{ log.workout_session.end_time|time:"h:i A" }}</td>
+                                 <td>{% if log.duration_minutes %}{{ log.duration_minutes }} min{% else %}-{% endif %}</td>
+                                <td>{% if log.sets_completed %}{{ log.sets_completed }}{% else %}-{% endif %}</td>
+                                <td>{% if log.reps_completed %}{{ log.reps_completed }}{% else %}-{% endif %}</td>
                                 <td>{% if log.weight_kg %}{{ log.weight_kg }}{% else %}-{% endif %}</td>
-                                <td>{% if log.duration_minutes %}{{ log.duration_minutes }} min{% else %}-{% endif %}</td>
-                                <td>{{ log.created_at|date:"Y-m-d H:i" }}</td>
+                                <td>{% if log.distance_km %}{{ log.distance_km }} km{% else %}-{% endif %}</td>
                                 <td>
                                     <a href="" class="btn btn-sm btn-warning">
                                         <i class="bi bi-pencil"></i>
@@ -89,4 +98,47 @@
         </div>
     </div>
 </div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.datatables.net/responsive/2.4.1/js/dataTables.responsive.min.js"></script>
+<script src="https://cdn.datatables.net/responsive/2.4.1/js/responsive.bootstrap5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.3.6/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.bootstrap5.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.print.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('.table').DataTable({
+            responsive: true,
+            dom: 'Bfrtip',
+            buttons: [
+                {
+                    extend: 'copyHtml5',
+                    text: '<i class="fas fa-copy"></i> Copy',
+                    className: 'btn btn-secondary btn-sm'
+                },
+                {            
+                    extend: 'excelHtml5',
+                    text: '<i class="fas fa-file-excel"></i> Excel',
+                    className: 'btn btn-success btn-sm'
+                },
+                {
+                    extend: 'pdfHtml5',
+                    text: '<i class="fas fa-file-pdf"></i> PDF',
+                    className: 'btn btn-danger btn-sm'
+                },
+                {
+                    extend: 'print',
+                    text: '<i class="fas fa-print"></i> Print',
+                    className: 'btn btn-info btn-sm'
+                }
+            ]
+        });
+    });
+</script>
 {% endblock %}

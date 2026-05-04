@@ -1,14 +1,14 @@
 {% extends 'index.html' %}
 {% load static %}
 
-{% block title %}Exercise Logs{% endblock %}
+{% block title %}Workout Sessions{% endblock %}
 
 {% block content %}
 <div class="container mt-4">
     <div class="card shadow">
         <div class="card-header bg-primary text-white">
             <h3 class="mb-0">
-                <i class="bi bi-journal-bookmark-fill"></i> Workout Sessions
+                <i class="bi bi-card-list"></i> Workout Sessions
                 <a href="{% url 'workout-session-create' %}" class="btn btn-light btn-sm float-end">
                     <i class="bi bi-plus-circle"></i> Add Workout Session
                 </a>
@@ -21,12 +21,14 @@
                     <table class="table table-hover">
                         <thead class="table-dark">
                             <tr>
-                                <th>Workout Session</th>
-                                <th>Exercise</th>
+                                <th>Date</th>
+                                <th>Session Time</th>
+                                <th>Duration</th>
+                                <th>Exercise Name</th>
                                 <th>Sets</th>
                                 <th>Reps</th>
                                 <th>Weight (kg)</th>
-                                <th>Duration</th>
+                                <th>Distance (km)</th>
                                 <th>Date</th>
                                 <th>Actions</th>
                             </tr>
@@ -34,12 +36,14 @@
                         <tbody>
                             {% for session in workout_sessions %}
                             <tr>
-                                <td>{{ session }}</td>
-                                <td>{{ session.exercise.name }}</td>
-                                <td>{{ session.sets_completed }}</td>
-                                <td>{{ session.reps_completed }}</td>
-                                <td>{% if session.weight_kg %}{{ session.weight_kg }}{% else %}-{% endif %}</td>
+                                <td>{{ session.session_date }}</td>
+                                <td>{{ session.start_time|time:"H:i" }} - {{ session.end_time|time:"H:i" }}</td>
                                 <td>{% if session.duration_minutes %}{{ session.duration_minutes }} min{% else %}-{% endif %}</td>
+                                <td>{{ session.exercise.name }}</td>
+                                <td>{% if session.sets_completed %}{{ session.sets_completed }}{% else %}-{% endif %}</td>
+                                <td>{% if session.reps_completed %}{{ session.reps_completed }}{% else %}-{% endif %}</td>
+                                <td>{% if session.weight_kg %}{{ session.weight_kg }}{% else %}-{% endif %}</td>
+                                <td>{% if session.distance_km %}{{ session.distance_km }} km{% else %}-{% endif %}</td>
                                 <td>{{ session.created_at|date:"Y-m-d H:i" }}</td>
                                 <td>
                                     <a href="" class="btn btn-sm btn-warning">

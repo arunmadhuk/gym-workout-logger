@@ -10,7 +10,8 @@ def dashboard(request):
     user_logs = ExerciseLog.objects.filter(
         workout_session__user=request.user
     ).select_related('exercise', 'workout_session').order_by('-workout_session__session_date')
-    
+    print(f"User {request.user.email} has {user_logs.count()} exercise logs.")
+   
     # Total stats
     total_workouts = WorkoutSession.objects.filter(user=request.user).count()
     total_exercises = user_logs.count()
@@ -18,6 +19,7 @@ def dashboard(request):
     # Calculate totals using loops
     total_sets = 0
     total_reps = 0
+    total_active_minutes = 0
     total_volume = 0
     total_duration = 0
     weekday_counts = {}
@@ -29,7 +31,7 @@ def dashboard(request):
         # Sum totals
         total_sets += log.sets_completed
         total_reps += log.reps_completed
-        
+     
         if log.weight_kg:
             total_volume += log.sets_completed * log.reps_completed * log.weight_kg
         
@@ -37,7 +39,7 @@ def dashboard(request):
             total_duration += log.duration_minutes
         
         # Most active day
-        weekday_name = log.created_at.strftime('%A')
+        weekday_name = log.workout_session.session_date.strftime('%A')
         weekday_counts[weekday_name] = weekday_counts.get(weekday_name, 0) + 1
         
         # Exercise type distribution
@@ -70,7 +72,7 @@ def dashboard(request):
     }
     
     for day in last_7_days:
-        day_logs = [log for log in user_logs if log.created_at.date() == day]
+        day_logs = [log for log in user_logs if log.workout_session.session_date == day]
         day_count = len(day_logs)
         
         # Calculate day volume

@@ -1,0 +1,385 @@
+{% extends 'index.html' %}
+{% load static %}
+
+{% block title %}{{ title }} - Fitness Tracker{% endblock %}
+
+{% block extra_css %}
+<style>
+    .exercise-formset {
+        border-left: 3px solid #007bff;
+        margin-bottom: 20px;
+    }
+    .formset-row {
+        background-color: #f8f9fa;
+        padding: 15px;
+        margin-bottom: 15px;
+        border-radius: 5px;
+        transition: all 0.3s;
+    }
+    .formset-row:hover {
+        background-color: #e9ecef;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .delete-row {
+        margin-top: 30px;
+    }
+    .duration-help {
+        font-size: 0.875rem;
+        color: #6c757d;
+        margin-top: 5px;
+    }
+    .calories-info {
+        background-color: #e7f3ff;
+        border-left: 4px solid #007bff;
+        padding: 10px;
+        margin-top: 10px;
+        border-radius: 4px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">{{ title }}</h3>
+                </div>
+                <div class="card-body">
+                    <form method="post" id="workout-form">
+                        {% csrf_token %}
+                        
+                        <!-- Workout Session Section -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-info text-white">
+                                <h5 class="mb-0">Session Information</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <label for="session_date" class="form-label">Session Date</label>
+                                        <input type="date" class="form-control" id="session_date" placeholder="Session Date" onfocus="this.max=new Date().toISOString().split('T')[0]" 
+                                            onfocusout="validateDate()" required>
+                                        <div class="invalid-feedback session-date-feedback">
+                                            Select a Valid Date.
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-4">
+                                        <label for="start_time" class="form-label">Start Time</label>
+                                        <input type="time" class="form-control" id="start_time" placeholder="Start Time" required>
+                                        <div class="invalid-feedback start-time-feedback">
+                                            Select a Valid Time.
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <label for="end_time" class="form-label">End Time</label>
+                                        <input type="time" class="form-control" id="end_time" placeholder="End Time" onfocusout="validateTime()" required>
+                                        <div class="invalid-feedback end-time-feedback">
+                                            Select a Valid Time.
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <label for="calories_burned" class="form-label">Calories Burned</label>
+                                        <input type="number" class="form-control" id="calories_burned" placeholder="Calories Burned" min="0">
+                                    </div>
+                                    
+                                    <div class="col-md-4">
+                                        <label for="notes" class="form-label">Notes</label>
+                                        <textarea class="form-control" id="notes" rows="2"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Exercise Logs Section -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-success text-white">
+                                <h5 class="mb-0">Exercise Logs</h5>
+                            </div>
+                            <div class="card-body">
+                                                        
+                                <div id="exercises-forms-container">
+                                    {% for form in formset %}
+                                        <div class="formset-row" id="exercise-{{ forloop.counter0 }}-row">
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <h6 class="text-muted mb-3">Exercise #{{ forloop.counter }}</h6>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="row">
+                                                <div class="col-md-6 mb-3">
+                                                    <label class="form-label">Exercise *</label>
+                                                    {{ form.exercise }}
+                                                    {% if form.exercise.errors %}
+                                                        <div class="text-danger small">{{ form.exercise.errors }}</div>
+                                                    {% endif %}
+                                                </div>
+                                                 <div class="col-md-3 mb-3">
+                                                    <label class="form-label">Duration (minutes)</label>
+                                                    {{ form.duration_minutes }}
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="row">
+                                                <div class="col-md-3 mb-3">
+                                                    <label class="form-label">Sets *</label>
+                                                    {{ form.sets_completed }}
+                                                </div>
+                                                
+                                                <div class="col-md-3 mb-3">
+                                                    <label class="form-label">Reps *</label>
+                                                    {{ form.reps_completed }}
+                                                </div>
+                                                
+                                                <div class="col-md-3 mb-3">
+                                                    <label class="form-label">Weight (kg)</label>
+                                                    {{ form.weight_kg }}
+                                                </div>
+                                                
+                                                <div class="col-md-3 mb-3">
+                                                    <label class="form-label">Distance (km)</label>
+                                                    {{ form.distance_km }}
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="row">
+                                                <div class="col-md-12 mb-3">
+                                                    <label class="form-label">Exercise Notes</label>
+                                                    {{ form.notes }}
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    {% if form.instance.pk %}
+                                                        <label class="form-check-label">
+                                                            {{ form.DELETE }} Delete this exercise
+                                                        </label>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                            
+                                            {% for hidden in form.hidden_fields %}
+                                                {{ hidden }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                                
+                                <button type="button" id="add-exercise-btn" class="btn btn-outline-success mt-2" onclick="addExerciseForm()">
+                                    <i class="fas fa-plus"></i> Add Another Exercise
+                                </button>
+                                <button type="button" id="delete-exercise-btn" class="btn btn-outline-danger mt-2" onclick="deleteLastExercise()">
+                                    <i class="fas fa-trash"></i> Delete Last Exercise
+                                </button>   
+                            </div>
+                        </div>
+                        
+                        <!-- Action Buttons -->
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'dashboard' %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-save"></i> Save Workout Session
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Dynamic formset management
+    let formCount = {{ formset.total_form_count }};
+    console.log('Initial form count:', formCount);
+
+    function addExerciseForm() {
+        console.log('Add Exercise button clicked');
+        const container = document.getElementById('exercises-forms-container');
+        const newForm = container.children[0].cloneNode(true);
+        
+        // Clear input values in cloned form
+        newForm.querySelectorAll('input, select, textarea').forEach(input => {
+            if (input.type !== 'hidden' && input.type !== 'checkbox') {
+                input.value = '';
+            }
+            if (input.type === 'checkbox') {
+                input.checked = false;
+            }
+        });
+        
+        // Update IDs and names for the new form
+        const newIndex = formCount;
+        newForm.querySelectorAll('[id*="-"]').forEach(element => {
+            if (element.id) {
+                element.id = element.id.replace(/-(\d+)-/, `-${newIndex}-`);
+            }
+        });
+        
+        newForm.querySelectorAll('[name*="-"]').forEach(element => {
+            if (element.name) {
+                element.name = element.name.replace(/-(\d+)-/, `-${newIndex}-`);
+            }
+        });
+        
+        // Update the heading
+        const heading = newForm.querySelector('h6');
+        if (heading) {
+            heading.textContent = `Exercise #${newIndex + 1}`;
+        }
+        
+        container.appendChild(newForm);
+        formCount++;
+        
+        // Update management form total forms count
+        document.getElementById('id_exerciselog_set-TOTAL_FORMS').value = formCount;
+    }
+function deleteLastExercise() {
+    console.log('Delete Exercise button clicked');
+    console.log('Current formCount:', formCount);
+    
+    if (formCount <= 1) {
+        alert('At least one exercise log is required.');
+        return;
+    }
+    
+    const container = document.getElementById('exercises-forms-container');
+    const forms = container.getElementsByClassName('formset-row');
+    
+    if (forms.length > 1) {
+        // Remove the last form
+        const lastForm = forms[forms.length - 1];
+        lastForm.remove();
+        formCount--;
+        
+        // Update the TOTAL_FORMS management field
+        const totalFormsInput = document.getElementById('id_exerciselog_set-TOTAL_FORMS');
+        if (totalFormsInput) {
+            totalFormsInput.value = formCount;
+        }
+        
+        console.log('New formCount:', formCount);
+    }
+}
+
+
+function validateDate() {
+    let sess_date = document.querySelector('#session_date');
+    console.log("Validating Date: " + sess_date.value);
+    let today = new Date().toISOString().split('T')[0];
+    if (sess_date.value) {
+        console.log("Session Date: " + sess_date.value + ", Today's Date: " + today);
+
+            if (sess_date.value > today) {
+        sess_date.setCustomValidity("Session date cannot be in the future.");
+        $('#session_date').addClass('is-invalid');
+        $('.session-date-feedback').text("Session date cannot be in the future.");
+    } else {
+        sess_date.setCustomValidity("");
+        $('#session_date').removeClass('is-invalid').addClass('is-valid');
+        $('.session-date-feedback').text("Select a Valid Date.");
+    }
+    }
+    else {
+        console.log("Session date is empty.");
+        $('#session_date').addClass('is-invalid').removeClass('is-valid');
+        $('.session-date-feedback').text("Session date is invalid.");
+    }
+
+}
+
+function validateTime() {
+    let strt_time = document.querySelector('#start_time');
+    let ed_time = document.querySelector('#end_time');
+    if (strt_time.value && ed_time.value && strt_time.value >= ed_time.value) {
+        ed_time.setCustomValidity("End time must be after start time.");
+        $('#end_time').addClass('is-invalid');
+        $('.end-time-feedback').text("End time must be after start time.");
+    } else {
+        ed_time.setCustomValidity("");
+        $('#end_time').removeClass('is-invalid');
+        $('.end-time-feedback').text("Select a Valid Time.");
+    }
+}
+
+
+    {% comment %} document.getElementById('add-exercise-btn').addEventListener('click', function() {
+        console.log('Add Exercise button clicked');
+        const container = document.getElementById('exercises-forms-container');
+        const newForm = container.children[0].cloneNode(true);
+        
+        // Clear input values in cloned form
+        newForm.querySelectorAll('input, select, textarea').forEach(input => {
+            if (input.type !== 'hidden' && input.type !== 'checkbox') {
+                input.value = '';
+            }
+            if (input.type === 'checkbox') {
+                input.checked = false;
+            }
+        });
+        
+        // Update IDs and names for the new form
+        const newIndex = formCount;
+        newForm.querySelectorAll('[id*="-"]').forEach(element => {
+            if (element.id) {
+                element.id = element.id.replace(/-(\d+)-/, `-${newIndex}-`);
+            }
+        });
+        
+        newForm.querySelectorAll('[name*="-"]').forEach(element => {
+            if (element.name) {
+                element.name = element.name.replace(/-(\d+)-/, `-${newIndex}-`);
+            }
+        });
+        
+        // Update the heading
+        const heading = newForm.querySelector('h6');
+        if (heading) {
+            heading.textContent = `Exercise #${newIndex + 1}`;
+        }
+        
+        container.appendChild(newForm);
+        formCount++;
+        
+        // Update management form total forms count
+        document.getElementById('id_exerciselog_set-TOTAL_FORMS').value = formCount;
+    });
+     {% endcomment %}
+    // Calculate duration preview (optional)
+    const startTimeInput = document.getElementById('{{ form.start_time.id_for_label }}');
+    const endTimeInput = document.getElementById('{{ form.end_time.id_for_label }}');
+    const dateInput = document.getElementById('{{ form.session_date.id_for_label }}');
+    
+    function previewDuration() {
+        if (startTimeInput.value && endTimeInput.value && dateInput.value) {
+            // You can add AJAX call here to preview duration
+            console.log('Duration will be calculated on save');
+        }
+    }
+    
+    startTimeInput?.addEventListener('change', previewDuration);
+    endTimeInput?.addEventListener('change', previewDuration);
+    
+    // Confirmation before submit
+    document.getElementById('workout-form').addEventListener('submit', function(e) {
+        const startTime = startTimeInput?.value;
+        const endTime = endTimeInput?.value;
+        
+        if (startTime && endTime && startTime === endTime) {
+            if (!confirm('Start and end times are the same. Duration will be 0 minutes. Continue?')) {
+                e.preventDefault();
+            }
+        }
+    });
+</script>
+{% endblock %}

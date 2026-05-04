@@ -99,6 +99,11 @@ class Exercise(models.Model):
         ('kettlebell', 'Kettlebell'),
         ('resistance_bands', 'Resistance Bands'),
         ('machine', 'Machine'),
+        ('bicycle', 'Bicycle'),
+        ('treadmill', 'Treadmill'),
+        ('elliptical', 'Elliptical'),
+        ('rowing_machine', 'Rowing Machine'),
+        ('yoga_mat', 'Yoga Mat'),
     )
     DIFFICULTY= (
         ('beginner', 'Beginner'),
@@ -113,6 +118,7 @@ class Exercise(models.Model):
     sets = models.PositiveIntegerField()
     reps = models.PositiveIntegerField()
     weight_kg = models.FloatField(null=True, blank=True)
+    distance_km = models.FloatField(null=True, blank=True)
     duration_minutes = models.PositiveIntegerField(null=True, blank=True)
     description = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
