@@ -1,0 +1,249 @@
+{% extends 'index.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow">
+                <div class="card-header bg-{{ button_color }} text-white">
+                    <h3 class="mb-0">
+                        <i class="bi {% if form.instance.pk %}bi-pencil-square{% else %}bi-plus-circle{% endif %}"></i>
+                        {{ title }} - {{ form.instance.name }}
+                    </h3>
+                </div>
+                
+                <div class="card-body">
+                    <form class="row g-3 p-2 needs-validation" method="post" novalidate>
+                        {% csrf_token %}
+                        
+                        <div class="col-5">
+                            <label for="exercise_name" class="form-label">Exercise Name</label>
+                            <input type="text" class="form-control" id="exercise_name" required value="{% if form.instance.pk %}{{ form.instance.name }}{% endif %}">
+                            <div class="invalid-feedback">
+                                Enter a Valid Exercise Name.
+                            </div>
+                        </div>
+                        
+                        <div class="col-5">
+                            <label for="exercise_type" class="form-label">Exercise Type</label>
+                          
+                            {{form.instance.exercise_type}} <!-- Display the current value for debugging -->
+                                <select class="form-select" id="exercise_type" name="exercise_type">
+                                {% for value, label in form.exercise_type.field.choices %}
+                                    <option value="{{ value }}" {% if form.instance.exercise_type|stringformat:"s" == value|stringformat:"s" %}selected{% endif %}>
+                                        {{ label }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            <div class="invalid-feedback">
+                                Please select a valid Exercise Type.
+                            </div>
+                        </div>
+
+                        <div class="col-5">
+                            <label for="equipment" class="form-label">Equipment</label>
+                            <select class="form-select" id="equipment" >
+                                {% for choice in form.equipment %}
+                                    {{choice}}
+                                {% endfor %}
+                            </select>
+                            <div class="invalid-feedback">
+                                Please select valid Equipment.
+                            </div>
+                        </div>
+                        
+                        <div class="col-5">
+                            <label for="difficulty" class="form-label">Difficulty Level</label>
+                            <select class="form-select" id="difficulty" required>
+                                {% for choice in form.difficulty %}
+                                    {{choice}}
+                                {% endfor %}
+                            </select>
+                            <div class="invalid-feedback">
+                                Please select a valid Difficulty Level.
+                            </div>
+                        </div>
+                        
+                        <div class="col-5">
+                            <label for="sets" class="form-label">No. Of Sets</label>
+                            <input type="number" class="form-control" id="sets" min="0" value="0">
+                            <div class="invalid-feedback">
+                                Enter a Valid Number of Sets.
+                            </div>
+                        </div>
+                        
+                        <div class="col-5">
+                            <label for="reps" class="form-label">No. Of Reps</label>
+                            <input type="number" class="form-control" id="reps" min="0" value="0">
+                            <div class="invalid-feedback">
+                                Enter a Valid Number of Reps.
+                            </div>
+                        </div>
+                        
+                        <div class="col-5">
+                            <label for="weight_kg" class="form-label">Weight in Kgs</label>
+                            <input type="number" class="form-control" id="weight_kg" min="0" value="0">
+                            <div class="invalid-feedback">
+                                Enter a Valid Weight.
+                            </div>
+                        </div>     
+                
+                        <div class="col-5">
+                            <label for="duration_minutes" class="form-label">Duration (minutes)</label>
+                            <input type="number" class="form-control" id="duration_minutes" min="0" value="0">
+                            <div class="invalid-feedback">
+                                Enter a valid duration.
+                            </div>
+                        </div>
+
+                        <div class="col-5">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea class="form-control" id="description" rows="2"></textarea>
+                        </div>
+                        
+                        <div class="justify-content-center mt-4">
+                            <button type="button" onclick="form_validator(event)" class="btn btn-{{ button_color }} px-4 ml-2">
+                                <i class="bi bi-check-circle"></i> {{ button_text }}
+                            </button>
+                            <button type="button" onclick="window.location.href='{% url 'exercise-list' %}'" class="btn btn-secondary px-4 ml-2">
+                                <i class="bi bi-x-circle"></i> Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+<script>
+// Make sure all functions are in the global scope
+window.show_toast = function(message) {
+    // Check if toast element exists
+    if ($('#liveToast').length) {
+        $('#toast-body').text(message);
+        var toast = new bootstrap.Toast(document.getElementById('liveToast'));
+        toast.show();
+    } else {
+        alert(message); // Fallback if toast doesn't exist
+    }
+}
+
+window.show_modal = function(title, body) {
+    if ($('#modal-title').length && $('#body-modal').length) {
+        $('#modal-title').text(title);
+        $('#body-modal').text(body);
+        var myModal = new bootstrap.Modal(document.getElementById('staticBackdrop'), {
+            keyboard: false
+        });
+        myModal.show();
+    }
+}
+
+window.form_validator = function(event) {
+    console.log("form validator called");
+    
+    'use strict'
+    
+    var form = document.querySelector('.needs-validation');
+    if (!form) {
+        console.error("Form not found");
+        return false;
+    }
+    
+    // Check validity
+    if (form.checkValidity() === false) {
+        if (event) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        form.classList.add('was-validated');
+        console.log("Form validation failed");
+        show_toast("Please fill in all required fields correctly.");
+        return false;
+    }
+    
+    let exercise_name = document.querySelector('#exercise_name');
+    let exercise_type = document.querySelector('#exercise_type');
+    let equipment = document.querySelector('#equipment');
+    let difficulty = document.querySelector('#difficulty');
+    
+    // Check if elements exist
+    if (!exercise_name || !exercise_type || !equipment || !difficulty) {
+        console.error("Required form elements not found");
+        show_toast("Form elements missing. Please refresh the page.");
+        return false;
+    }
+    
+    console.log("Exercise Name Validity: " + exercise_name.checkValidity());
+    console.log("Exercise Type Validity: " + exercise_type.checkValidity());
+    console.log("Equipment Validity: " + equipment.checkValidity());
+    console.log("Difficulty Validity: " + difficulty.checkValidity());
+    
+    if (exercise_name.checkValidity() == true && 
+        exercise_type.checkValidity() == true && 
+        equipment.checkValidity() == true && 
+        difficulty.checkValidity() == true) {
+        
+        var exercise_name_val = $('#exercise_name').val();
+        var exercise_type_val = $('#exercise_type').val();
+        var equipment_val = $('#equipment').val();
+        var difficulty_val = $('#difficulty').val();
+        var sets_val = $('#sets').val() || 0;
+        var reps_val = $('#reps').val() || 0;
+        var weight_kg_val = $('#weight_kg').val() || 0;
+        var duration_minutes_val = $('#duration_minutes').val() || 0;
+        var description_val = $('#description').val() || '';
+        
+        console.log("Exercise Name: " + exercise_name_val + 
+                    ", Exercise Type: " + exercise_type_val + 
+                    ", Equipment: " + equipment_val + 
+                    ", Difficulty: " + difficulty_val + 
+                    ", Sets: " + sets_val + 
+                    ", Reps: " + reps_val + 
+                    ", Weight: " + weight_kg_val + 
+                    ", Duration: " + duration_minutes_val);
+        
+        $.ajax({
+            url: "{% url 'exercise-create' %}",
+            type: "POST",
+            data: {
+                'name': exercise_name_val,
+                'exercise_type': exercise_type_val,
+                'equipment': equipment_val,
+                'difficulty': difficulty_val,
+                'sets': sets_val,
+                'reps': reps_val,
+                'weight_kg': weight_kg_val,
+                'duration_minutes': duration_minutes_val,
+                'description': description_val,
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            success: function(response) {
+                console.log("AJAX Success:", response);
+                show_modal("Exercise created successfully!", "The exercise has been created.");
+                setTimeout(function() {
+                    window.location.href = "{% url 'exercise-list' %}";
+                }, 1500);
+            },
+            error: function(xhr, status, error) {
+                console.log("AJAX Error:", status, error);
+                show_toast("Error creating exercise. Please try again.");
+            }
+        });
+        return false;
+    }
+    
+    return false;
+}
+
+// Optional: Log when script loads
+console.log("Script loaded successfully, form_validator is defined:", typeof window.form_validator);
+</script>
+
+{% endblock content %}

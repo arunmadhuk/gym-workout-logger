@@ -1,0 +1,40 @@
+{%extends 'dashboard/index.html'%}
+{% load static %}
+
+
+{% block content %}
+
+<script src="{% static 'js/signup.js' %}"></script>
+<script src="{% static 'js/user_profile.js' %}"></script>
+<div class="col-1">
+</div>
+<div class="col-9 justify-content-center mt-5">
+    <h1>Active User Sessions</h1>
+    <h2>Sessions per User</h2>
+    <ul>
+        {% for user, count in sessions_per_user.items %}
+            <li>{{ user }}: {{ count }}</li>
+        {% endfor %}
+    </ul>
+
+    <h2>Sessions per User per Day</h2>
+    <ul>
+        {% for user, dates in sessions_per_user_per_day.items %}
+            <li>{{ user }}</li>
+            <ul>
+                {% for date, count in dates.items %}
+                    <li>{{ date }}: {{ count }}</li>
+                {% endfor %}
+            </ul>
+        {% endfor %}
+    </ul>
+  
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+<script>
+  
+</script>
+
+{% endblock content %}

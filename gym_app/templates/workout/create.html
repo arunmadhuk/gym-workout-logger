@@ -1,0 +1,199 @@
+{% extends 'index.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow">
+                <div class="card-header bg-{{ button_color }} text-white">
+                    <h3 class="mb-0">
+                        <i class="bi {% if form.instance.pk %}bi-pencil-square{% else %}bi-plus-circle{% endif %}"></i>
+                        {{ title }}
+                    </h3>
+                </div>
+                
+                <div class="card-body">
+     
+                <form class="g-3 needs-validation" method="post" novalidate>
+                    {% csrf_token %}
+                    
+                    <div class="col-md-4">
+                        <label for="session_date" class="form-label">Session Date</label>
+                        <input type="date" class="form-control" id="session_date" placeholder="Session Date" onfocus="this.max=new Date().toISOString().split('T')[0]" 
+                            onfocusout="validateDate()" required>
+                        <div class="invalid-feedback session-date-feedback">
+                            Select a Valid Date.
+                        </div>
+                    </div>
+           
+                    <div class="col-md-4">
+                        <label for="start_time" class="form-label">Start Time</label>
+                        <input type="time" class="form-control" id="start_time" placeholder="Start Time" required>
+                        <div class="invalid-feedback start-time-feedback">
+                            Select a Valid Time.
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label for="end_time" class="form-label">End Time</label>
+                        <input type="time" class="form-control" id="end_time" placeholder="End Time" onfocusout="validateTime()" required>
+                        <div class="invalid-feedback end-time-feedback">
+                            Select a Valid Time.
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label for="calories_burned" class="form-label">Calories Burned</label>
+                        <input type="number" class="form-control" id="calories_burned" placeholder="Calories Burned" min="0">
+                    </div>
+
+                    <div class="col-md-4">
+                        <label for="notes" class="form-label">Notes</label>
+                        <textarea class="form-control" id="notes" rows="2"></textarea>
+                    </div>
+                    
+                    <div class="justify-content-center mt-4">
+                        <button type="button" onclick="form_validator()" class="btn btn-{{ button_color }} px-4 ml-2">
+                            <i class="bi bi-check-circle"></i> {{ button_text }}
+                        </button>
+                        <button href="" class="btn btn-secondary px-4 ml-2">
+                            <i class="bi bi-x-circle"></i> Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+            </div>
+     </div>
+    </div>
+</div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+<script>
+
+window.show_toast = function(message) {
+    // Check if toast element exists
+    if ($('#liveToast').length) {
+        $('#toast-body').text(message);
+        var toast = new bootstrap.Toast(document.getElementById('liveToast'));
+        toast.show();
+    } else {
+        alert(message); // Fallback if toast doesn't exist
+    }
+}
+
+window.show_modal = function(title, body) {
+    if ($('#modal-title').length && $('#body-modal').length) {
+        $('#modal-title').text(title);
+        $('#body-modal').text(body);
+        var myModal = new bootstrap.Modal(document.getElementById('staticBackdrop'), {
+            keyboard: false
+        });
+        myModal.show();
+    }
+}
+function validateDate() {
+    let sess_date = document.querySelector('#session_date');
+    console.log("Validating Date: " + sess_date.value);
+    let today = new Date().toISOString().split('T')[0];
+    if (sess_date.value) {
+        console.log("Session Date: " + sess_date.value + ", Today's Date: " + today);
+
+            if (sess_date.value > today) {
+        sess_date.setCustomValidity("Session date cannot be in the future.");
+        $('#session_date').addClass('is-invalid');
+        $('.session-date-feedback').text("Session date cannot be in the future.");
+    } else {
+        sess_date.setCustomValidity("");
+        $('#session_date').removeClass('is-invalid').addClass('is-valid');
+        $('.session-date-feedback').text("Select a Valid Date.");
+    }
+    }
+    else {
+        console.log("Session date is empty.");
+        $('#session_date').addClass('is-invalid').removeClass('is-valid');
+        $('.session-date-feedback').text("Session date is invalid.");
+    }
+
+}
+
+function validateTime() {
+    let strt_time = document.querySelector('#start_time');
+    let ed_time = document.querySelector('#end_time');
+    if (strt_time.value && ed_time.value && strt_time.value >= ed_time.value) {
+        ed_time.setCustomValidity("End time must be after start time.");
+        $('#end_time').addClass('is-invalid');
+        $('.end-time-feedback').text("End time must be after start time.");
+    } else {
+        ed_time.setCustomValidity("");
+        $('#end_time').removeClass('is-invalid');
+        $('.end-time-feedback').text("Select a Valid Time.");
+    }
+}
+
+  function form_validator(event) {
+    console.log("form validator")
+
+    'use strict'
+
+    var form = document.querySelector('.needs-validation');
+      if (!form) {
+        console.error("Form not found");
+        return false;
+      }
+      
+      // Check validity
+      if (form.checkValidity() === false) {
+        if (event) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+        form.classList.add('was-validated');
+        console.log("Form validation failed");
+        show_toast("Please fill in all required fields correctly.");
+        return false;
+      }
+
+
+    let sess_date = document.querySelector('#session_date');
+    let strt_time = document.querySelector('#start_time');
+    let ed_time = document.querySelector('#end_time');
+    console.log("Session Date Validity: " + sess_date.checkValidity());
+    console.log("Start Time Validity: " + strt_time.checkValidity());
+    console.log("End Time Validity: " + ed_time.checkValidity());
+    if (sess_date.checkValidity() == true && strt_time.checkValidity() == true && ed_time.checkValidity()) {
+        var session_date = ($('#session_date')).val();
+        var start_time = ($('#start_time')).val();
+        var end_time = ($('#end_time')).val();
+        var calories_burned = ($('#calories_burned')).val();
+        var notes = ($('#notes')).val();
+
+        console.log("Session Date : "+ session_date+", Start Time : "+ start_time+" , End Time : "+end_time)
+        $.ajax({
+        url: "{% url 'workout-session-create' %}",
+        type: "POST",
+        data: {
+            'session_date': session_date,
+            'start_time': start_time,
+            'end_time':end_time,
+            'calories_burned':calories_burned,
+            'notes':notes,
+            'csrfmiddlewaretoken': '{{ csrf_token }}'
+        },
+        success: function (response) {
+            show_modal("Workout session created successfully!", "The workout session has been created.");
+
+        },
+        error: function (xhr, status, error) {
+            console.log("AJAX Error:", status, error);
+            show_toast("Error creating workout session. Please try again.");
+        }
+        });
+         return false;
+    }
+
+  }
+</script>
+{% endblock content %}

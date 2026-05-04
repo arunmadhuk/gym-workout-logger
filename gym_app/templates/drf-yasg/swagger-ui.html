@@ -1,0 +1,7 @@
+{% extends "drf-yasg/swagger-ui.html" %}
+{% load static %}
+{% block extra_head %}
+  {{ block.super }} 
+  <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}"/>
+ 
+{% endblock %}

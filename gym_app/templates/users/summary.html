@@ -1,0 +1,367 @@
+{%extends 'dashboard/index.html'%}
+{% load static %}
+
+
+{% block content %}
+<div class="col-10 col-sm-10 col-md-10 col-lg-10 col-xl-10  col-xxl-10 ">
+    <div class="row mt-5">
+        <div class="container text-center">
+
+            <div class="col-10 d-flex justify-content-center">
+                <div class="table-responsive col-3 ">
+                    <table class=" table nowrap" style="width:100%">
+                        <tr class="table-warning">
+                            <th scope="row">Total No of Usrs :</th>
+                            <td><span id="record_name" style="font-weight: bold;">{{total_users}}</span></td>
+                        </tr>
+                        <tr class="table-success">
+                            <th scope="row">Account Activated:</td>
+                            <td><span id="contact_name" style="font-weight: bold;">{{email_verified}}</span></td>
+                        </tr>
+                        <tr class="table-danger">
+                            <th scope="row">Not Activated :</td>
+                            <td><span id="mobile_no" style="font-weight: bold;">{{not_verified}}</span></td>
+                        </tr>
+               
+                    </table>
+                </div>
+            </div>
+
+
+            <div class="col-md-10 col-10 my-5">
+                <div class="d-flex justify-content-center">
+                    <div class="col-10">
+                        <h1 class="mb-3">Login Summary</h1>
+                    </div>
+
+                    </div>
+                    <div class="d-flex justify-content-center">
+                        <div class="col-4 float-end">
+                        
+                            <a href="{%url 'login-create' %}"><button class=" btn-primary p-2"><i class="bi bi-person-add"></i>
+                                    Create New Login</button> </a>
+                        </div>
+                    <div class="col-2 float-end">
+
+                        <a href=""><button class=" btn-primary p-2"><i
+                                    class="fas fa-file-excel"></i>
+                                Export to Excel</button> </a>
+                    </div>
+
+                </div>
+
+                <table id="login-data" class="table table-bordered nowrap align-middle" style="width:100%">
+                    <thead class="table-dark mt-2 text-center">
+                        <tr class="text-center">
+                            <th scope="col">User Name</th>
+                            <th scope="col">e-Mail</th>
+                            <th scope="col">Countries</th>
+                            <th scope="col">Region</th>
+                            <th scope="col">Created On</th>
+                            <th scope="col">Last Login</th>
+                            <th scope="col">Login Count</th>
+                            <th scope="col">Options</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        <tr class="w-auto">
+                            <td> <a href="">{{user.username}}</a></td>
+                            <td> {{user.email}}</td>
+                            <td> {{user.countries|join:", "}}</td>
+                            <td> {{user.regions|join:", "}}</td>
+                            <td> {{user.created_at}}</td>
+                            <td> {{user.last_login}}</td>
+                            <td> {{user.todays_logins}}</td>
+                            <td>
+                                {% if user.auth_provider == 'EMAIL' %}
+                                <button class="btn btn-warning" data-bs-toggle="tooltip"
+                                    data-bs-title="Change Password"><i class="bi bi-database-fill-lock"></i></button>
+                                {% endif %}
+                                <button class="btn btn-info" data-bs-toggle="tooltip" data-bs-title="Account Verify"><i
+                                        class="bi bi-person-check"></i></button>
+                            </td>
+                        </tr>
+                        {%endfor%}
+                    </tbody>
+                    <tfoot class="mb-3">
+
+                    </tfoot>
+                </table>
+            </div>
+
+        </div>
+    </div>
+    <div class="modal fade " id="password_change" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+        aria-labelledby="modal-title" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <p class="modal-title" id="password_change_title"> </p>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                    <form class="row needs-validation justify-content-center" novalidate>
+                        <div class="mb-3 position-relative">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="change_password" autocomplete="off" readonly
+                                onfocus="this.removeAttribute('readonly');" onfocusout="checkPassword()" required>
+                            <div class="invalid-tooltip" id="password_tooltip">
+                                Provide a Password.
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" onclick="update_password()">Update Password</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade " id="user_update" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+        aria-labelledby="modal-title" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <p class="modal-title" id="user_update_title"> </p>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                    <form class="row needs-validation justify-content-center" novalidate>
+                        <div class="mx-5">
+                            <div class="form-check mb-3 mx-10">
+                                <input class="form-check-input" type="checkbox" value="" id="is_verified">
+                                <label class="form-check-label" for="is_verified">
+                                    Verified
+                                </label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button id="btn_update" type="button" class="btn btn-danger" onclick="update_user_email_verified()"
+                        disabled>Update Details</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/2.0.8/css/dataTables.dataTables.css" />
+
+<script src="https://cdn.datatables.net/2.0.8/js/dataTables.js"></script>
+
+<script>
+    $("ajax_loading").show()
+    let password_change = []
+    let account_update = []
+    let isPasswordValid = false
+    let isVerified = 0
+    jQuery(document).ready(function ($) {
+
+        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+        const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+
+        $("ajax_loading").show()
+
+        $("#ajax_loading").hide();
+    });
+
+    let table = $('#login-data').DataTable(
+        {
+            scrollX: true,
+            scrollCollapse: true,
+            responsive: true,
+            order: [[8, 'desc']],
+            columnDefs: [
+                {
+                    target: 0,
+                    visible: false,
+                    searchable: false
+                }]
+
+        }
+    );
+
+    // User Password Reset
+    $('#login-data tbody').on('click', '.bi-database-fill-lock', function () {
+        password_change = table.row($(this).parents('tr')).data();
+        // console.log(password_change)
+        let msg = "Reset password for user : '" + password_change[1] + "'"
+
+        $("#password_change_title").html(msg)
+        var myModal = new bootstrap.Modal(document.getElementById('password_change'), {
+            keyboard: false
+        })
+        myModal.show()
+    });
+
+
+    $("#is_verified").change(function () {
+        if (this.checked) {
+            console.log("checked")
+            isVerified= 1
+        }
+        else {
+            console.log("unchecked")
+            isVerified= 0
+        }
+        $('#btn_update').prop('disabled', false)
+    });
+
+    // User Verify state update
+    $('#login-data tbody').on('click', '.bi-person-check', function () {
+        account_update = table.row($(this).parents('tr')).data();
+        // console.log(account_update)
+        let msg = "Update Verified state for user : '" + account_update[1] + "'"
+
+        is_verified = account_update[6]
+        if (is_verified == "Verified") {
+            $('#is_verified').prop('checked', true)
+        }
+        else {
+            $('#is_verified').prop('checked', false)
+        }
+
+        $("#user_update_title").html(msg)
+        var myModal = new bootstrap.Modal(document.getElementById('user_update'), {
+            keyboard: false
+        })
+        myModal.show()
+        $('#btn_update').prop('disabled', true)
+    });
+
+    function checkPassword() {
+        password = $("#change_password").val();
+
+        // If password not entered
+        if (password.length === 0) {
+            $("#password_tooltip").html("*Password field cant be empty");
+            $("#change_password").removeClass("is-valid").addClass("is-invalid");
+        }
+
+        if (password.length < 6 && password.length > 0) {
+            // $('#password1').tooltip('show')
+            $("#password_tooltip").html(
+                "*Password must contain at least 6 characters."
+            );
+            $("#change_password").html("");
+            $("#change_password").removeClass("is-valid").addClass("is-invalid");
+        }
+        if (password.length >= 6 && password) {
+            $("#change_password").removeClass("is-invalid").addClass("is-valid");
+            isPasswordValid = true
+        }
+        console.log("isPasswordValid---->", isPasswordValid)
+    }
+
+    function update_password() {
+
+        'use strict'
+
+        var forms = document.querySelectorAll('.needs-validation')
+
+        var validation = Array.prototype.filter.call(forms, function (form) {
+            if (!form.checkValidity()) {
+                event.preventDefault()
+                event.stopPropagation()
+            }
+            form.classList.add("was-validated");
+        });
+
+        let change_password = document.querySelector('#change_password');
+        if (change_password.checkValidity() === true && isPasswordValid) {
+
+            $('#password_change').modal('hide');
+            let email = password_change[1]
+            let change_password = $('#change_password').val()
+            show_ajax_loading()
+            $.ajax({
+                type: 'POST',
+                url: '/reset_user_password_ajax/',
+                data: {
+                    email: email,
+                    password: change_password,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                success: function (data) {
+
+                    console.log(data)
+                    hide_ajax_loading()
+
+                    if (data == 200) {
+                        // console.log(data)
+                        $('#modal-title').html('<i class="fas fa-1x fa-check-circle text-success"></i>' + '  ' + "<span style='font-size: 30px;'class='text-success'> <b> Success ! </b> </span>")
+                        $('#body-modal').html('User "' + email + '" password reset successfully ');
+                    }
+                    else if (data == 417) {
+
+                        $('#modal-title').html('<i class="fas fa-1x text-danger fa-exclamation-circle"></i>' + '  ' + "<span style='font-size: 30px;'class='text-danger'> <b> Warning </b> </span>")
+                        $('#body-modal').html('User "' + email + '" password reset failed. Please try again later');
+                    }
+                    var myModal = new bootstrap.Modal(document.getElementById('staticBackdrop'), {
+                        keyboard: false
+                    })
+                    myModal.show()
+
+                },
+
+                error: function (data) {
+                    console.log(data)
+                }
+
+            });
+            return false;
+        }
+    }
+
+    function update_user_email_verified() {
+
+        $('#user_update').modal('hide');
+        let email = account_update[1]
+        show_ajax_loading()
+        $.ajax({
+            type: 'POST',
+            url: '/update_user_email_verified_ajax/',
+            data: {
+                email: email,
+                is_email_verified: isVerified,
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            success: function (data) {
+
+                // console.log(data)
+                hide_ajax_loading()
+
+                if (data == 200) {
+                    // console.log(data)
+                    $('#modal-title').html('<i class="fas fa-1x fa-check-circle text-success"></i>' + '  ' + "<span style='font-size: 30px;'class='text-success'> <b> Success ! </b> </span>")
+                    $('#body-modal').html('User "' + email + '" email verify state updated successfully ');
+                }
+                else if (data == 417) {
+
+                    $('#modal-title').html('<i class="fas fa-1x text-danger fa-exclamation-circle"></i>' + '  ' + "<span style='font-size: 30px;'class='text-danger'> <b> Warning </b> </span>")
+                    $('#body-modal').html('User "' + email + '" email verify state update failed. Please try again later');
+                }
+                var myModal = new bootstrap.Modal(document.getElementById('staticBackdrop'), {
+                    keyboard: false
+                })
+                myModal.show()
+
+            },
+
+            error: function (data) {
+                console.log(data)
+            }
+
+        });
+        return false;
+    }
+
+</script>
+{% endblock content %}
