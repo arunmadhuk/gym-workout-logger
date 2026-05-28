@@ -54,6 +54,7 @@
                                 <td>{% if exercise.distance_km %}{{ exercise.distance_km }} km{% else %}-{% endif %}</td>
                                 <td>{% if exercise.duration_minutes %}{{ exercise.duration_minutes }} min{% else %}-{% endif %}</td>
                                 <td>
+                                
                                     <a href="{% url 'exercise-edit' exercise.pk %}" class="btn btn-sm btn-warning">
                                         <i class="bi bi-pencil"></i>
                                     </a>

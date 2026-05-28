@@ -25,29 +25,11 @@
                 <li class="nav-item">
                     <a class="nav-link" aria-current="page" href="{% url 'dashboard' %}">Home</a>
                 </li>
-
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">Workout</a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="{% url 'workout-session-create' %}">Create</a></li>
-                        <li><a class="dropdown-item" href="{% url 'workout-session-list' %}">List</a></li>
-                    </ul>
+                <li class="nav-item">
+                    <a class="nav-link" aria-current="page" href="{% url 'workout-session-list' %}">Workout</a>
                 </li>
-
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">Exercise</a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="{% url 'exercise-create' %}">Create</a></li>
-                        <li><a class="dropdown-item" href="{% url 'exercise-list' %}">List</a></li>
-                    </ul>
-                </li>
-
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">Logs</a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="{% url 'exercise-logs-create' %}">Create</a></li>
-                        <li><a class="dropdown-item" href="{% url 'exercise-logs-list' %}">List</a></li>
-                    </ul>
+                <li class="nav-item">
+                    <a class="nav-link" aria-current="page" href="{% url 'exercise-list' %}">Exercise</a>
                 </li>
             {% endif %}
             </ul>

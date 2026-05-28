@@ -1,60 +1,26 @@
+import json
+
 from django.shortcuts import get_object_or_404, render
-from gym_app.forms import WorkoutSessionForm, ExerciseLogFormSet
-from gym_app.models import WorkoutSession, User, Exercise
+from gym_app.forms import WorkoutSessionForm, ExerciseLogFormSet, ExerciseLogForm
+from gym_app.models import ExerciseLog, WorkoutSession, User, Exercise
 from django.contrib import messages
 from django.shortcuts import redirect
 from django.contrib.auth.decorators import login_required
 
 
 @login_required
-def create_workoutsession(request):
-    print("Create workout session view called")
-    print(f"Request : {request}")
-    template_name = 'workout/create.html'
-    context = {'title': 'Create Workout Session', 'button_text': 'Create Session', 'button_color': 'success'}
-    if request.method == 'POST':
-        print("WorkoutSessionForm submitted with data:")
-
-        user = User.objects.filter(email=request.user.email).first()
-        print(f"User retrieved from database: {user}")
-        data = {
-            'user': user,
-            'session_date': request.POST.get('session_date'),
-            'start_time': request.POST.get('start_time'),
-            'end_time': request.POST.get('end_time'),
-            'calories_burned': request.POST.get('calories_burned'),
-            'notes': request.POST.get('notes'),
-        }
-        print(f"Data to be validated: {data}")
-        if not WorkoutSession.objects.filter(user=user, session_date=data['session_date'], start_time=data['start_time'], end_time=data['end_time']).exists():
-            form = WorkoutSessionForm(data)
-            if form.is_valid():
-                form.save()
-                print("Form is valid. Workout session would be saved to the database.")
-            else:
-                print("Form is invalid. Errors:")
-                print(form.errors)
-                context['form'] = form
-                return render(request, template_name, context)
-        else:
-            print("A workout session with the same user, date, start time, and end time already exists.")
-            form = WorkoutSessionForm(data)
-            form.add_error(None, "A workout session with the same date and time already exists.")
-            context['form'] = form
-            return render(request, template_name, context)
-
-   
-        context['message'] = 'Workout session created successfully!'
-    return render(request, template_name, context)
-
-
-@login_required
 def workout_session_list(request):
-    workout_sessions = WorkoutSession.objects.filter(user=request.user).order_by('-created_at')
+
+    exercise_logs = ExerciseLog.objects.filter(
+        workout_session__user=request.user
+    ).select_related('workout_session', 'exercise').order_by('-workout_session__session_date', '-workout_session__start_time')
+    print(f"Retrieved {exercise_logs.count()} exercise logs for user {request.user.email}")
+
     context = {
-        'workout_sessions': workout_sessions
+        'exercise_logs': exercise_logs
     }
-    return render(request, 'workout/list.html', context)
+
+    return render(request, 'workout/workout_session_list.html', context)
 
 
 @login_required
@@ -63,32 +29,43 @@ def create_workout_session(request):
     Combined view for creating WorkoutSession with ExerciseLogs
     """
     if request.method == 'POST':
-        form = WorkoutSessionForm(request.POST)
-        formset = ExerciseLogFormSet(request.POST)
         print("Received POST data for workout session creation:")
         print(request.POST)
-        print(f"WorkoutSession Form valid: {form.is_valid()}, ExerciseLogFormSet valid: {formset.is_valid()}")
+        data = json.loads(request.body)  # Parse JSON
+        workout_data = data.get('workout_data')
+        workout_data['user'] = request.user  # Set the user for the workout session
+        exercise_data = data.get('exercise_data')
+        print("Workout Data:", workout_data)
+        print("Exercise Data:", exercise_data)
+
+        form = WorkoutSessionForm(workout_data)
+        # formset = ExerciseLogFormSet(, form_kwargs={'user': request.user})
+        print("Received POST data for workout session creation:")
+        print(request.POST)
+        print(f"WorkoutSession Form valid: {form.is_valid()}")
         print("WorkoutSession Form errors:", form.errors)
-        print("ExerciseLogFormSet errors:", formset.errors)
-        if form.is_valid() and formset.is_valid():
-            # Save the workout session
-            # workout_session = form.save(commit=False)
-            # workout_session.user = request.user
-            # workout_session.save()
-            
-            # # Save the exercise logs
-            # exercise_logs = formset.save(commit=False)
-            # for log in exercise_logs:
-            #     log.workout_session = workout_session
-            #     log.save()
-            
+
+        if form.is_valid():
+            workout_session = form.save(commit=False)
+            workout_session.save()
+            qs = WorkoutSession.objects.get(session_id=1)
+            exercise_data['workout_session'] = qs
+            exercise_data['exercise'] = Exercise.objects.get(name=exercise_data['exercise_name'])
+            exercise_log_form = ExerciseLogForm(exercise_data)
+            print(f"ExerciseLogForm valid: {exercise_log_form.is_valid()}")
+            print("ExerciseLogForm errors:", exercise_log_form.errors)
+            if exercise_log_form.is_valid():
+                print("Both forms are valid. Saving workout session and exercise log.")
+                # Save the workout session
+                exercise_log_form.save()
+          
             messages.success(request, f'Workout session saved successfully! Duration: {form.cleaned_data["duration_minutes"]} minutes')
             return redirect('workout-session-list')
         else:
             messages.error(request, 'Please correct the errors below.')
     else:
         form = WorkoutSessionForm()
-        formset = ExerciseLogFormSet()
+        formset = ExerciseLogFormSet(  form_kwargs={'user': request.user})
 
     # Get all exercises for the template (for creating new exercise logs)
     
@@ -102,6 +79,7 @@ def create_workout_session(request):
     }
     return render(request, 'workout/create_workout_session.html', context)
 
+
 @login_required
 def edit_workout_session(request, session_id):
     """
@@ -112,20 +90,31 @@ def edit_workout_session(request, session_id):
     if request.method == 'POST':
         form = WorkoutSessionForm(request.POST, instance=workout_session)
         formset = ExerciseLogFormSet(request.POST, instance=workout_session)
-        
+        print(f"session_id ID: {session_id}")
+        print(f"workout Data: {form.data}")
+        print(f"Is form valid? {form.is_valid()}")
+        print(f"Form errors: {form.errors if not form.is_valid() else 'No errors'}")
         if form.is_valid() and formset.is_valid():
-            form.save()
-            formset.save()
+            # form.save()
+            # formset.save()
             messages.success(request, 'Workout session updated successfully!')
             return redirect('workout_session_detail', session_id=workout_session.session_id)
     else:
         form = WorkoutSessionForm(instance=workout_session)
-        formset = ExerciseLogFormSet(instance=workout_session)
+        
+        exercise_logs = ExerciseLog.objects.filter(workout_session=workout_session).all()
+        print(exercise_logs)
+        exercise_form = ExerciseLogForm(instance=exercise_logs)
+        print(f"Retrieved {exercise_logs.count()} exercise logs for workout session ID {session_id}")
     
+    print(f"Editing WorkoutSession ID: {session_id}")
+    print(f"Initial workout session data: {form.initial}")
+    print(f"Initial exercise logs data: {exercise_form.initial }")
+
     context = {
         'form': form,
-        'formset': formset,
+        'formset': exercise_form,
         'title': 'Edit Workout Session',
         'workout_session': workout_session,
     }
-    return render(request, 'workout/create_workout_session.html', context)
+    return render(request, 'workout/edit_workout_session.html', context)

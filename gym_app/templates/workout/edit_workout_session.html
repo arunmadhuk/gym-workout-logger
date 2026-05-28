@@ -60,7 +60,7 @@
                                     <div class="col-md-4">
                                         <label for="session_date" class="form-label">Session Date</label>
                                         <input type="date" class="form-control" id="session_date" placeholder="Session Date" onfocus="this.max=new Date().toISOString().split('T')[0]" 
-                                            onfocusout="validateDate()" required>
+                                            onfocusout="validateDate()" required value="{{ form.session_date.value|default:'' }}">
                                         <div class="invalid-feedback session-date-feedback">
                                             Select a Valid Date.
                                         </div>
@@ -68,7 +68,7 @@
                                     
                                     <div class="col-md-4">
                                         <label for="start_time" class="form-label">Start Time</label>
-                                        <input type="time" class="form-control" id="start_time" placeholder="Start Time" required>
+                                        <input type="time" class="form-control" id="start_time" placeholder="Start Time" required value="{{ form.start_time.value|default:'' }}">
                                         <div class="invalid-feedback start-time-feedback">
                                             Select a Valid Time.
                                         </div>
@@ -76,7 +76,7 @@
 
                                     <div class="col-md-4">
                                         <label for="end_time" class="form-label">End Time</label>
-                                        <input type="time" class="form-control" id="end_time" placeholder="End Time" onfocusout="validateTime()" required>
+                                        <input type="time" class="form-control" id="end_time" placeholder="End Time" onfocusout="validateTime()" required value="{{ form.end_time.value|default:'' }}">
                                         <div class="invalid-feedback end-time-feedback">
                                             Select a Valid Time.
                                         </div>
@@ -86,12 +86,12 @@
                                 <div class="row">
                                     <div class="col-md-4">
                                         <label for="calories_burned" class="form-label">Calories Burned</label>
-                                        <input type="number" class="form-control" id="calories_burned" placeholder="Calories Burned" min="0">
+                                        <input type="number" class="form-control" id="calories_burned" placeholder="Calories Burned" min="0" value="{{ form.calories_burned.value|default:'' }}">
                                     </div>
                                     
                                     <div class="col-md-8">
                                         <label for="notes" class="form-label">Notes</label>
-                                        <textarea class="form-control" id="notes" rows="1"></textarea>
+                                        <textarea class="form-control" id="notes" rows="1">{{ form.notes.value|default:'' }}</textarea>
                                     </div>
                                 </div>
                             </div>
@@ -105,13 +105,7 @@
                             <div class="card-body">
                                                         
                                 <div id="exercises-forms-container">
-                                    {% comment %} {% for form in formset %} {% endcomment %}
                                         <div class="formset-row" id="exercise-{{ forloop.counter0 }}-row">
-                                            {% comment %} <div class="row">
-                                                <div class="col-md-12">
-                                                    <h6 class="text-muted mb-3">Exercise #{{ forloop.counter }}</h6>
-                                                </div>
-                                            </div> {% endcomment %}
                                             
                                             <div class="row">
                                                 <div class="col-md-6 mb-3">
@@ -136,44 +130,45 @@
                                             <div class="row">
                                                 <div class="col-md-3 mb-3">
                                                     <label class="form-label">Sets *</label>
-                                                    <input type="number" class="form-control" id="sets" name="{{ form.sets.html_name }}" min="1" >
+                                                    <input type="number" class="form-control" id="sets" name="{{ form.sets.html_name }}" min="1" value="{{ form.sets.value|default:'' }}">
                                                 </div>
                                                 
                                                 <div class="col-md-3 mb-3">
                                                     <label class="form-label">Reps *</label>
-                                                    <input type="number" class="form-control" id="reps" name="{{ form.reps.html_name }}" min="1" >
+                                                    <input type="number" class="form-control" id="reps" name="{{ form.reps.html_name }}" min="1" value="{{ form.reps.value|default:'' }}">
                                                 </div>
                                                 
                                                 <div class="col-md-3 mb-3" id="weight_kg_div" style="display: none;">
                                                     <label class="form-label">Weight (kg)</label>
-                                                    <input type="number" class="form-control" id="weight_kg" name="{{ form.weight_kg.html_name }}" min="0">
+                                                    <input type="number" class="form-control" id="weight_kg" name="{{ form.weight_kg.html_name }}" min="0" value="{{ form.weight_kg.value|default:'' }}">
                                                 </div>
                                                 
                                                 <div class="col-md-3 mb-3" id="distance_km_div" style="display: none;">
                                                     <label class="form-label">Distance (km)</label>
-                                                    <input type="number" class="form-control" id="distance_km" name="{{ form.distance_km.html_name }}" min="0">
+                                                    <input type="number" class="form-control" id="distance_km" name="{{ form.distance_km.html_name }}" min="0" value="{{ form.distance_km.value|default:'' }}">
                                                 </div>
                                             </div>
                                             
                                             <div class="row">
                                                 <div class="col-md-9 mb-3">
                                                     <label class="form-label">Exercise Notes</label>
-                                                        <textarea class="form-control" id="exercise_notes" name="{{ form.notes.html_name }}" rows="2"></textarea>
+                                                        <textarea class="form-control" id="exercise_notes" name="{{ form.notes.html_name }}" rows="2">{{ form.notes.value|default:'' }}</textarea>
                                                 </div>
                                             </div>
-
+                                            
                                         </div>
                                 </div>
                             </div>
                         </div>
                         
+                        <!-- Action Buttons -->
                         <div class="d-flex justify-content-center gap-2 mt-4">
-                            <button type="button" class="btn btn-primary btn-md" onclick="createWorkoutSession()">
-                                <i class="bi bi-save"></i> Create Workout Session
-                            </button>
                             <a href="{% url 'dashboard' %}" class="btn btn-secondary btn-md">
                                <i class="bi bi-arrow-left"></i> Cancel
                             </a>
+                            <button type="button" class="btn btn-primary btn-md" onclick="createWorkoutSession()">
+                                <i class="bi bi-save"></i> Create Workout Session
+                            </button>
                         </div>
                     </div>
                 </form>

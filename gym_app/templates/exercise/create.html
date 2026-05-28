@@ -6,7 +6,7 @@
 {% block content %}
 <div class="container mt-4">
     <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-6">
+        <div class="col-md-10">
             <div class="card shadow">
                 <div class="card-header bg-{{ button_color }} text-white">
                     <h3 class="mb-0">
@@ -14,94 +14,107 @@
                         {{ title }}
                     </h3>
                 </div>
-                
-                <div class="card-body">
-                    <form class="row g-3 p-2 needs-validation" method="post" novalidate>
+                <form class="needs-validation" method="post" novalidate>
+                    <div class="card-body">
+                    
                         {% csrf_token %}
-                        
-                        <div class="col-5">
-                            <label for="exercise_name" class="form-label">Exercise Name</label>
-                            <input type="text" class="form-control" id="exercise_name" required>
-                            <div class="invalid-feedback">
-                                Enter a Valid Exercise Name.
+                        <div class="row mx-5 p-2">
+                            <div class="col-5">
+                                <label for="exercise_name" class="form-label">Exercise Name</label>
+                                <input type="text" class="form-control" id="exercise_name" required>
+                                <div class="invalid-feedback">
+                                    Enter a Valid Exercise Name.
+                                </div>
                             </div>
-                        </div>
-                        
-                        <div class="col-5">
-                            <label for="exercise_type" class="form-label">Exercise Type</label>
-                            <select class="form-select" id="exercise_type" >
+                            
+                            <div class="col-5">
+                                <label for="exercise_type" class="form-label">Exercise Type</label>
+                                <select class="form-select" id="exercise_type" >
 
-                                {% for exercise_type in form.exercise_type %}
-                                    {{ exercise_type }}
-                                {% endfor %}
-                            </select>
-                            <div class="invalid-feedback">
-                                Please select a valid Exercise Type.
+                                    {% for exercise_type in form.exercise_type %}
+                                        {{ exercise_type }}
+                                    {% endfor %}
+                                </select>
+                                <div class="invalid-feedback">
+                                    Please select a valid Exercise Type.
+                                </div>
                             </div>
                         </div>
+                        <div class="row mx-5 p-2">
+                            <div class="col-5">
+                                <label for="equipment" class="form-label">Equipment</label>
+                                <select class="form-select" id="equipment" >
+                                    {% for choice in form.equipment %}
+                                        {{choice}}
+                                    {% endfor %}
+                                </select>
+                                <div class="invalid-feedback">
+                                    Please select valid Equipment.
+                                </div>
+                            </div>
+                            
+                            <div class="col-5">
+                                <label for="difficulty" class="form-label">Difficulty Level</label>
+                                <select class="form-select" id="difficulty" required>
+                                    {% for choice in form.difficulty %}
+                                        {{choice}}
+                                    {% endfor %}
+                                </select>
+                                <div class="invalid-feedback">
+                                    Please select a valid Difficulty Level.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mx-5 p-2">
+                            <div class="col-5">
+                                <label for="sets" class="form-label">No. Of Sets</label>
+                                <input type="number" class="form-control" id="sets" min="0" value="0">
+                                <div class="invalid-feedback">
+                                    Enter a Valid Number of Sets.
+                                </div>
+                            </div>
+                            
+                            <div class="col-5">
+                                <label for="reps" class="form-label">No. Of Reps</label>
+                                <input type="number" class="form-control" id="reps" min="0" value="0">
+                                <div class="invalid-feedback">
+                                    Enter a Valid Number of Reps.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mx-5 p-2">
+                            <div class="col-5">
+                                <label for="weight_kg" class="form-label">Weight in Kgs</label>
+                                <input type="number" class="form-control" id="weight_kg" min="0" value="0">
+                                <div class="invalid-feedback">
+                                    Enter a Valid Weight.
+                                </div>
+                            </div>     
+                    
+                            <div class="col-5">
+                                <label for="duration_minutes" class="form-label">Duration (minutes)</label>
+                                <input type="number" class="form-control" id="duration_minutes" min="0" value="0">
+                                <div class="invalid-feedback">
+                                    Enter a valid duration.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mx-5 p-2">
+                            <div class="col-5">
+                                <label for="distance_km" class="form-label">Distance (km)</label>
+                                <input type="number" class="form-control" id="distance_km" min="0" value="0">
+                                <div class="invalid-feedback">
+                                    Enter a valid distance.
+                                </div>
+                            </div>
 
-                        <div class="col-5">
-                            <label for="equipment" class="form-label">Equipment</label>
-                            <select class="form-select" id="equipment" >
-                                {% for choice in form.equipment %}
-                                    {{choice}}
-                                {% endfor %}
-                            </select>
-                            <div class="invalid-feedback">
-                                Please select valid Equipment.
+                            <div class="col-5">
+                                <label for="description" class="form-label">Description</label>
+                                <textarea class="form-control" id="description" rows="1"></textarea>
                             </div>
                         </div>
                         
-                        <div class="col-5">
-                            <label for="difficulty" class="form-label">Difficulty Level</label>
-                            <select class="form-select" id="difficulty" required>
-                                {% for choice in form.difficulty %}
-                                    {{choice}}
-                                {% endfor %}
-                            </select>
-                            <div class="invalid-feedback">
-                                Please select a valid Difficulty Level.
-                            </div>
-                        </div>
-                        
-                        <div class="col-5">
-                            <label for="sets" class="form-label">No. Of Sets</label>
-                            <input type="number" class="form-control" id="sets" min="0" value="0">
-                            <div class="invalid-feedback">
-                                Enter a Valid Number of Sets.
-                            </div>
-                        </div>
-                        
-                        <div class="col-5">
-                            <label for="reps" class="form-label">No. Of Reps</label>
-                            <input type="number" class="form-control" id="reps" min="0" value="0">
-                            <div class="invalid-feedback">
-                                Enter a Valid Number of Reps.
-                            </div>
-                        </div>
-                        
-                        <div class="col-5">
-                            <label for="weight_kg" class="form-label">Weight in Kgs</label>
-                            <input type="number" class="form-control" id="weight_kg" min="0" value="0">
-                            <div class="invalid-feedback">
-                                Enter a Valid Weight.
-                            </div>
-                        </div>     
-                
-                        <div class="col-5">
-                            <label for="duration_minutes" class="form-label">Duration (minutes)</label>
-                            <input type="number" class="form-control" id="duration_minutes" min="0" value="0">
-                            <div class="invalid-feedback">
-                                Enter a valid duration.
-                            </div>
-                        </div>
-
-                        <div class="col-5">
-                            <label for="description" class="form-label">Description</label>
-                            <textarea class="form-control" id="description" rows="2"></textarea>
-                        </div>
-                        
-                        <div class="justify-content-center mt-4">
+                        <div class="d-flex justify-content-center gap-2 mt-4">
                             <button type="button" onclick="form_validator(event)" class="btn btn-{{ button_color }} px-4 ml-2">
                                 <i class="bi bi-check-circle"></i> {{ button_text }}
                             </button>
@@ -109,8 +122,9 @@
                                 <i class="bi bi-x-circle"></i> Cancel
                             </button>
                         </div>
-                    </form>
-                </div>
+                   
+                    </div>
+                 </form>
             </div>
         </div>
     </div>
@@ -133,7 +147,7 @@ window.show_toast = function(message) {
 
 window.show_modal = function(title, body) {
     if ($('#modal-title').length && $('#body-modal').length) {
-        $('#modal-title').text(title);
+        $('#modal-title').html(title);
         $('#body-modal').text(body);
         var myModal = new bootstrap.Modal(document.getElementById('staticBackdrop'), {
             keyboard: false
@@ -141,6 +155,12 @@ window.show_modal = function(title, body) {
         myModal.show();
     }
 }
+
+    $('#staticBackdrop').on('hidden.bs.modal', function (e) {
+       //location.reload();
+        console.log("exercise-list url")
+        window.location.href = "{% url 'exercise-list' %}";
+    });
 
 window.form_validator = function(event) {
     console.log("form validator called");
@@ -196,6 +216,7 @@ window.form_validator = function(event) {
         var weight_kg_val = $('#weight_kg').val() || 0;
         var duration_minutes_val = $('#duration_minutes').val() || 0;
         var description_val = $('#description').val() || '';
+        var distance_km_val = $('#distance_km').val() || 0;
         
         console.log("Exercise Name: " + exercise_name_val + 
                     ", Exercise Type: " + exercise_type_val + 
@@ -204,7 +225,8 @@ window.form_validator = function(event) {
                     ", Sets: " + sets_val + 
                     ", Reps: " + reps_val + 
                     ", Weight: " + weight_kg_val + 
-                    ", Duration: " + duration_minutes_val);
+                    ", Duration: " + duration_minutes_val + 
+                    ", Distance: " + distance_km_val);
         
         $.ajax({
             url: "{% url 'exercise-create' %}",
@@ -219,21 +241,32 @@ window.form_validator = function(event) {
                 'weight_kg': weight_kg_val,
                 'duration_minutes': duration_minutes_val,
                 'description': description_val,
+                'distance_km': distance_km_val,
                 'csrfmiddlewaretoken': '{{ csrf_token }}'
             },
+    
             success: function(response) {
                 console.log("AJAX Success:", response);
-                show_modal("Exercise created successfully!", "The exercise has been created.");
-                setTimeout(function() {
-                    window.location.href = "{% url 'exercise-list' %}";
-                }, 1500);
+                  console.log(data)
+                        title = '<i class="bi bi-check-circle-fill text-success"></i>' + '  ' + "<span style='font-size: 15px;' class='text-success'> <b> Success ! </b> </span>"
+                        body = exercise_name_val + ' ' + difficulty_val + ' created successfully';
             },
             error: function(xhr, status, error) {
+                console.log(xhr.status)
                 console.log("AJAX Error:", status, error);
-                show_toast("Error creating exercise. Please try again.");
+                if (xhr.status == 409)
+                {
+                title = '<i class="bi bi-exclamation-circle-fill text-danger"></i>' + '  ' + "<span style='font-size: 15px;' class='text-danger'> <b> Warning </b> </span>"
+                body = exercise_name_val + ' ' + difficulty_val + ' exist already'
+                }
+                elif(xhr.status == 500){
+                title = '<i class="bi bi-exclamation-circle-fill text-danger"></i>' + '  ' + "<span style='font-size: 15px;' class='text-danger'> <b> Error </b> </span>"
+                body = exercise_name_val + ' ' + difficulty_val + ' creation failed'
+                }
+
+                show_modal(title, body)
             }
         });
-        return false;
     }
     
     return false;

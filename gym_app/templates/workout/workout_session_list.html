@@ -1,0 +1,289 @@
+{% extends 'index.html' %}
+{% load static %}
+
+{% block title %}Exercise Logs{% endblock %}
+
+{% block content %}
+
+<!-- DataTables CSS -->
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/responsive/2.4.1/css/responsive.bootstrap5.min.css">
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/2.3.6/css/buttons.bootstrap5.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Font Awesome 6 (free icons) -->
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h3 class="mb-0">
+                <i class="bi bi-journal-bookmark-fill"></i> Workout Logs
+                <a href="{% url 'workout-create' %}" class="btn btn-light btn-sm float-end">
+                    <i class="bi bi-plus-circle"></i> Add Workout Log
+                </a>
+            </h3>
+        </div>
+        
+        <div class="card-body">
+            {% if exercise_logs %}
+                <div class="table-responsive">
+                    <table class="table table-hover" id="workout_logs_table">
+                        <thead class="table-dark">
+                            <tr >
+                                <th>Date</th>
+                                <th>Exercise Name</th>
+                                <th>Session Time</th>
+                                <th>Duration</th>
+                                <th>Weight (kg)</th>
+                                <th>Distance (km)</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for log in exercise_logs %}
+                            <tr class="w-auto">
+                                <td>{{ log.workout_session.session_date }}</td>
+                                <td>{{ log.exercise.name }}</td>
+                                <td>{{ log.workout_session.start_time|time:"h:i A" }} - {{ log.workout_session.end_time|time:"h:i A" }}</td>
+                                <td>{% if log.exercise.duration_minutes %}{{ log.exercise.duration_minutes }} min{% else %}-{% endif %}</td>
+                                <td>{% if log.weight_kg %}{{ log.weight_kg }}{% else %}-{% endif %}</td>
+                                <td>{% if log.exercise.distance_km %}{{ log.exercise.distance_km }} km{% else %}-{% endif %}</td>
+                                <td>
+                                 <button type="button" class="btn btn-sm btn-info" data-bs-toggle="modal"  onclick="loadWorkoutSummary({{ log.pk }})">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                          
+                                    <a href="{% url 'workout-edit' log.workout_session.session_id %}" class="btn btn-sm btn-warning">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ log.pk }}">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                    
+                                    <!-- Delete Modal -->
+                                    <div class="modal fade" id="deleteModal{{ log.pk }}" tabindex="-1">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">Confirm Delete</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    Are you sure you want to delete this exercise log?
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                    <form method="post" action="" style="display: inline;">
+                                                        {% csrf_token %}
+                                                        <button type="submit" class="btn btn-danger">Delete</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="modal fade" id="workoutSummaryModal" data-bs-backdrop="static" data-bs-keyboard="true" tabindex="-1" aria-labelledby="workoutSummaryModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                                            <div class="modal-content shadow-lg border-0 rounded-4">
+                                         
+                                                <div class="modal-header bg-info-gradient text-white rounded-top-4" style="background: linear-gradient(95deg, #0b5ed7, #20c997);">
+                                                    <h5 class="modal-title fw-bold" id="workoutSummaryModalLabel">
+                                                        <i class="fas fa-clipboard-list me-2"></i> Workout Session Summary
+                                                    </h5>
+                                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                
+
+                                                <div class="modal-body p-2">
+                                                
+                                                    <div class="summary-card p-2 mb-2 rounded-3 shadow-sm">
+                                                        <div class="d-flex align-items-center mb-3">
+                                                            <i class="fas fa-info-circle fs-4 text-info me-2"></i>
+                                                            <h6 class="mb-0 fw-bold text-info">Session Information</h6>
+                                                        </div>
+                                                        <div class="row g-3">
+                                                            <!-- Session Date -->
+                                                            <div class="col-3">
+                                                                <div class="summary-label"><i class="fa-solid fa-calendar-alt me-1"></i> Session Date</div>
+                                                                <div class="summary-value fw-semibold" id="summary_session_date">-</div>
+                                                            </div>
+                                                            <!-- Start Time -->
+                                                            <div class="col-3">
+                                                                <div class="summary-label"><i class="fas fa-hourglass-start me-1"></i> Start Time</div>
+                                                                <div class="summary-value" id="summary_start_time">-</div>
+                                                            </div>
+                                                            <!-- End Time -->
+                                                            <div class="col-3">
+                                                                <div class="summary-label"><i class="fas fa-hourglass-end me-1"></i> End Time</div>
+                                                                <div class="summary-value" id="summary_end_time">-</div>
+                                                            </div>
+                                                            <!-- Calories Burned -->
+                                                            <div class="col-3">
+                                                                <div class="summary-label"><i class="fas fa-fire me-1 text-danger"></i> Calories Burned</div>
+                                                                <div class="summary-value" id="summary_calories">-</div>
+                                                            </div>
+                                                            <!-- Notes (session) -->
+                                                            <div class="col-12">
+                                                                <div class="summary-label"><i class="fas fa-pen-alt me-1"></i> Session Notes</div>
+                                                                <div class="summary-value " id="summary_session_notes">-</div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    
+
+                                                    <div class="mb-2 d-flex align-items-center">
+                                                        <i class="fas fa-dumbbell fs-5 text-success me-2"></i>
+                                                        <h6 class="fw-bold text-success mb-0">Exercise Logs</h6>
+                                                
+                                                    </div>
+                                                    
+                                                        <div class="exercise-item p-2 mb-2 rounded-3 shadow-sm">
+                                                            <div class="d-flex flex-wrap align-items-center justify-content-center mb-2">
+                                                            <h6 class="fw-bold mb-0 text-dark" id="exercise_name"></h6>
+                                                            </div>
+                                                            <div class="row row-cols-2 row-cols-md-4 g-2 small mb-2">
+                                                                <div class="col">
+                                                                    <div class="summary-label mb-0">Duration</div>
+                                                                    <span class="fw-semibold" id="duration">-</span>
+                                                                </div>
+                                                                <div class="col">
+                                                                    <div class="summary-label mb-0">Sets</div>
+                                                                    <span class="fw-semibold" id="sets">-</span>
+                                                                </div>
+                                                                <div class="col">
+                                                                    <div class="summary-label mb-0">Reps</div>
+                                                                    <span class="fw-semibold" id="reps">-</span>
+                                                                </div>
+                                                                <div class="col">
+                                                                    <div class="summary-label mb-0" id="extra_label">Extra</div>
+                                                                    <span class="fw-semibold" id="extra_value">-</span>
+                                                                </div>
+                                                            </div>
+                                                            <div class="mt-2 pt-1 border-top border-light">
+                                                                <div class="summary-label mb-1"><i class="fas fa-sticky-note me-1 text-secondary"></i> Exercise notes</div>
+                                                                <div class="small text-secondary p-2 rounded" id="exercise_notes">
+                                                             -
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                </div>
+
+                                                <div class="modal-footer bg-light">
+                                                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                                                        <i class="fas fa-times me-1"></i> Close
+                                                    </button>
+                                                
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+
+
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="bi bi-emoji-frown" style="font-size: 48px;"></i>
+                    <h4 class="mt-3">No exercise logs found</h4>
+                    <p class="text-muted">Start tracking your workouts by adding an exercise log.</p>
+                    <a href="{% url 'exercise-logs-create' %}" class="btn btn-primary mt-2">
+                        <i class="bi bi-plus-circle"></i> Add Your First Exercise Log
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.datatables.net/responsive/2.4.1/js/dataTables.responsive.min.js"></script>
+<script src="https://cdn.datatables.net/responsive/2.4.1/js/responsive.bootstrap5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.3.6/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.bootstrap5.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+
+<script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.html5.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        $('.table').DataTable({
+            responsive: true,
+             order: [[0, 'desc']],
+            dom: 'Bfrtip',
+            buttons: [
+                {
+                    extend: 'copyHtml5',
+                    text: '<i class="fas fa-copy"></i> Copy',
+                    className: 'btn btn-secondary btn-sm'
+                },
+                {            
+                    extend: 'excelHtml5',
+                    text: '<i class="fas fa-file-excel"></i> Excel',
+                    className: 'btn btn-success btn-sm'
+                },
+            ]
+        });
+    });
+
+    function loadWorkoutSummary(log_id) {
+
+        console.log("Loading workout summary for log ID:", log_id);
+//data-bs-target="#workoutSummaryModal"
+        if (log_id) {
+            $.ajax({
+                type: "GET",
+                url: "/load-selected-workout-ajax/",
+                data: {
+                log_id: log_id,
+                },
+                success: function (data) {
+                    console.log('Received data:', data);
+                    if (data.error) {
+                        alert(data.error);
+                        return;
+                    }
+                    if (data){
+                        $('#summary_session_date').text(data.session_date || '-');
+                        $('#summary_start_time').text(data.start_time || '-');
+                        $('#summary_end_time').text(data.end_time || '-');
+                        $('#summary_calories').text(data.calories_burned ? data.calories_burned + ' kcal' : '-');
+                        $('#summary_session_notes').text(data.session_notes || '-');
+                        $('#exercise_name').text(data.exercise_name || '-');
+                        $('#duration').text(data.exercise_duration ? data.exercise_duration + ' min' : '-');
+                        $('#sets').text(data.sets_completed + '/' + data.sets || '-');
+                        $('#reps').text(data.reps_completed + '/' + data.reps || '-');
+                        if(data.weight_kg){
+                            $('#extra_label').text('Weight');
+                            $('#extra_value').html(`<i class="fas fa-dumbbell"></i> ${data.weight_kg} kg`);
+                        } else if (data.distance_km){
+                            $('#extra_label').text('Distance');
+                            $('#extra_value').html(`<i class="fas fa-tachometer-alt"></i> ${data.distance_km} km`);
+                        } else {
+                            $('#extra_label').text('Extra');
+                            $('#extra_value').html('<span class="text-muted">—</span>');
+                        }
+            
+                        $('#exercise_notes').text(data.exercise_notes || '-');
+                        var myModal = new bootstrap.Modal(document.getElementById('workoutSummaryModal'), {
+                            keyboard: false
+                        })
+                        myModal.show()
+                    }
+
+                },
+                error: function (response) {
+                    console.log(response);
+                    alert('An error occurred while loading the workout summary. Please try again.');
+                },
+            });
+   
+        }
+    }
+</script>
+{% endblock %}
