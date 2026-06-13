@@ -36,6 +36,8 @@ def load_selected_workout_ajax(request):
         if exercise_logs:
             log = exercise_logs.first()
             data = {
+                "log_id":log.log_id,
+                "workout_session_id":log.workout_session.session_id,
                 "session_date": log.workout_session.session_date,
                 "start_time": log.workout_session.start_time,
                 "end_time": log.workout_session.end_time,
@@ -62,5 +64,5 @@ def load_selected_workout_ajax(request):
 
     else:
         print("No log ID provided in the request.")
-
+    print(data)
     return JsonResponse(data, safe=False)

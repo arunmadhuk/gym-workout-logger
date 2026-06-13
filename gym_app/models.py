@@ -135,6 +135,7 @@ class ExerciseLog(models.Model):
     exercise = models.ForeignKey(Exercise, on_delete=models.PROTECT)
     sets_completed = models.PositiveIntegerField()
     reps_completed = models.PositiveIntegerField()
+    distance_km = models.FloatField(null=True, blank=True)
     weight_kg = models.FloatField(null=True, blank=True)
     duration_minutes = models.PositiveIntegerField(null=True, blank=True)
     notes = models.TextField(blank=True, null=True)

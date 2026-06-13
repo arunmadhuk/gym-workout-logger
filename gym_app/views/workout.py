@@ -1,5 +1,5 @@
 import json
-
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render
 from gym_app.forms import WorkoutSessionForm, ExerciseLogFormSet, ExerciseLogForm
 from gym_app.models import ExerciseLog, WorkoutSession, User, Exercise
@@ -49,7 +49,7 @@ def create_workout_session(request):
             workout_session = form.save(commit=False)
             workout_session.save()
             qs = WorkoutSession.objects.get(session_id=1)
-            exercise_data['workout_session'] = qs
+            exercise_data['workout_session'] = workout_session
             exercise_data['exercise'] = Exercise.objects.get(name=exercise_data['exercise_name'])
             exercise_log_form = ExerciseLogForm(exercise_data)
             print(f"ExerciseLogForm valid: {exercise_log_form.is_valid()}")
@@ -70,7 +70,6 @@ def create_workout_session(request):
     # Get all exercises for the template (for creating new exercise logs)
     
     exercises = Exercise.objects.all().order_by('name')
-    
     context = {
         'form': form,
         'formset': formset,
@@ -86,35 +85,60 @@ def edit_workout_session(request, session_id):
     Edit existing workout session with its exercise logs
     """
     workout_session = get_object_or_404(WorkoutSession, session_id=session_id, user=request.user)
-    
+    exercise_logs = ExerciseLog.objects.filter(workout_session=workout_session).first()
     if request.method == 'POST':
-        form = WorkoutSessionForm(request.POST, instance=workout_session)
-        formset = ExerciseLogFormSet(request.POST, instance=workout_session)
+        print("Received POST data for workout session updation:")
+        data = json.loads(request.body)  # Parse JSON
+        workout_data = data.get('workout_data')
+        workout_data['user'] = request.user  
+        exercise_data = data.get('exercise_data')
+        exercise_data['workout_session'] = workout_session
+        exercise_data['exercise'] = Exercise.objects.get(name=exercise_data['exercise_name'])
+        print("Workout Data:", workout_data)
+        print("Exercise Data:", exercise_data)
+
+        form = WorkoutSessionForm(workout_data, instance=workout_session)
+        formset = ExerciseLogForm(exercise_data, instance=exercise_logs)
         print(f"session_id ID: {session_id}")
         print(f"workout Data: {form.data}")
         print(f"Is form valid? {form.is_valid()}")
-        print(f"Form errors: {form.errors if not form.is_valid() else 'No errors'}")
+        print(f"Form errors: {form.errors if not form.is_valid() else 'No errors in form'}")
+        
+        print(f"Is formset valid? {formset.is_valid()}")
+        print(f"formset errors: {formset.errors if not formset.is_valid() else 'No errors in formset'}")
         if form.is_valid() and formset.is_valid():
-            # form.save()
-            # formset.save()
+            form.save()
+            formset.save()
             messages.success(request, 'Workout session updated successfully!')
-            return redirect('workout_session_detail', session_id=workout_session.session_id)
+            return redirect('workout-session-list')
+        else:
+            errors = {}
+            if form.errors:
+                errors['workout_errors'] = form.errors
+            if formset.errors:
+                errors['exercise_errors'] = formset.errors
+            if form.non_field_errors():
+                errors['non_field_errors'] = form.non_field_errors()
+          
+            error_fields = list(form.errors.keys()) + list(formset.errors.keys())
+            errors['error_fields'] = error_fields
+            
+            return JsonResponse(errors, status=400)
     else:
         form = WorkoutSessionForm(instance=workout_session)
-        
-        exercise_logs = ExerciseLog.objects.filter(workout_session=workout_session).all()
-        print(exercise_logs)
         exercise_form = ExerciseLogForm(instance=exercise_logs)
-        print(f"Retrieved {exercise_logs.count()} exercise logs for workout session ID {session_id}")
-    
-    print(f"Editing WorkoutSession ID: {session_id}")
-    print(f"Initial workout session data: {form.initial}")
-    print(f"Initial exercise logs data: {exercise_form.initial }")
-
+            
+        print(f"Editing WorkoutSession ID: {session_id}")
+        print(f"Initial workout session data: {form.initial}")
+        print(f"Initial exercise logs data: {exercise_form.initial }")
+    exercises = Exercise.objects.all().order_by('name')
     context = {
         'form': form,
-        'formset': exercise_form,
+        'exercise_form': exercise_form,
+        'exercises': exercises,
         'title': 'Edit Workout Session',
         'workout_session': workout_session,
+        'session_id':session_id
     }
+  
     return render(request, 'workout/edit_workout_session.html', context)

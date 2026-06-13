@@ -3,7 +3,7 @@
 
 {% block title %}{{ title }} - Fitness Tracker{% endblock %}
 
-{% block extra_css %}
+{% block content %}
 <style>
     .exercise-formset {
         border-left: 3px solid #007bff;
@@ -36,9 +36,9 @@
         border-radius: 4px;
     }
 </style>
-{% endblock %}
 
-{% block content %}
+
+
 <div class="container mt-4">
     <div class="row">
         <div class="col-md-10">
@@ -46,21 +46,21 @@
                 <div class="card-header bg-primary text-white">
                     <h3 class="mb-0">{{ title }}</h3>
                 </div>
-                    <form class="needs-validation" method="post" id="workout-form" novalidate>
-                        {% csrf_token %}
-                        <div class="card-body">
-               
+                <form class="needs-validation" method="post" id="workout-form" novalidate>
+                    {% csrf_token %}
+                    <div class="card-body">
                         <!-- Workout Session Section -->
                         <div class="card mb-4">
                             <div class="card-header bg-info text-white">
                                 <h5 class="mb-0">Session Information</h5>
                             </div>
                             <div class="card-body">
+                                <!--first row-->
                                 <div class="row">
                                     <div class="col-md-4">
                                         <label for="session_date" class="form-label">Session Date</label>
                                         <input type="date" class="form-control" id="session_date" placeholder="Session Date" onfocus="this.max=new Date().toISOString().split('T')[0]" 
-                                            onfocusout="validateDate()" required value="{{ form.session_date.value|default:'' }}">
+                                            onfocusout="validateDate()" required value="{{ form.session_date.value|date:'Y-m-d' }}">
                                         <div class="invalid-feedback session-date-feedback">
                                             Select a Valid Date.
                                         </div>
@@ -68,7 +68,7 @@
                                     
                                     <div class="col-md-4">
                                         <label for="start_time" class="form-label">Start Time</label>
-                                        <input type="time" class="form-control" id="start_time" placeholder="Start Time" required value="{{ form.start_time.value|default:'' }}">
+                                        <input type="time" class="form-control" id="start_time" placeholder="Start Time" required value="{{ form.start_time.value|time:'H:i' }}">
                                         <div class="invalid-feedback start-time-feedback">
                                             Select a Valid Time.
                                         </div>
@@ -76,13 +76,13 @@
 
                                     <div class="col-md-4">
                                         <label for="end_time" class="form-label">End Time</label>
-                                        <input type="time" class="form-control" id="end_time" placeholder="End Time" onfocusout="validateTime()" required value="{{ form.end_time.value|default:'' }}">
+                                        <input type="time" class="form-control" id="end_time" placeholder="End Time" onfocusout="validateTime()" required value="{{ form.end_time.value|time:'H:i' }}">
                                         <div class="invalid-feedback end-time-feedback">
                                             Select a Valid Time.
                                         </div>
                                     </div>
                                 </div>
-                                
+                                <!--second row-->
                                 <div class="row">
                                     <div class="col-md-4">
                                         <label for="calories_burned" class="form-label">Calories Burned</label>
@@ -102,88 +102,81 @@
                             <div class="card-header bg-success text-white">
                                 <h5 class="mb-0">Exercise Logs</h5>
                             </div>
-                            <div class="card-body">
-                                                        
-                                <div id="exercises-forms-container">
-                                        <div class="formset-row" id="exercise-{{ forloop.counter0 }}-row">
-                                            
-                                            <div class="row">
-                                                <div class="col-md-6 mb-3">
-                                                    <label class="form-label">Exercise *</label>
-                                                    <select class="form-select" aria-label="Choose an exercise" id="exercise_name" name="{{ form.exercise.html_name }}" required onchange="loadSelectedExercise(this)">
-                                                        <option value="" selected disabled>Choose an exercise</option>
-                                                        {% for exercise in exercises %}
-                                                            <option value="{{ exercise.id }}" {% if form.exercise.value == exercise.id|stringformat:"s" %}selected{% endif %}>
-                                                                {{ exercise.name }}
-                                                            </option>
-                                                        {% endfor %}
-                                                    </select>
-                                             
-                                                </div>
-                                                 <div class="col-md-3 mb-3">
-                                                    <label class="form-label">Duration (minutes)</label>
-                                                    <input type="number" class="form-control" id="duration_minutes" name="{{ form.duration_minutes.html_name }}" min="0">
-
-                                                </div>
-                                            </div>
-                                            
-                                            <div class="row">
-                                                <div class="col-md-3 mb-3">
-                                                    <label class="form-label">Sets *</label>
-                                                    <input type="number" class="form-control" id="sets" name="{{ form.sets.html_name }}" min="1" value="{{ form.sets.value|default:'' }}">
-                                                </div>
-                                                
-                                                <div class="col-md-3 mb-3">
-                                                    <label class="form-label">Reps *</label>
-                                                    <input type="number" class="form-control" id="reps" name="{{ form.reps.html_name }}" min="1" value="{{ form.reps.value|default:'' }}">
-                                                </div>
-                                                
-                                                <div class="col-md-3 mb-3" id="weight_kg_div" style="display: none;">
-                                                    <label class="form-label">Weight (kg)</label>
-                                                    <input type="number" class="form-control" id="weight_kg" name="{{ form.weight_kg.html_name }}" min="0" value="{{ form.weight_kg.value|default:'' }}">
-                                                </div>
-                                                
-                                                <div class="col-md-3 mb-3" id="distance_km_div" style="display: none;">
-                                                    <label class="form-label">Distance (km)</label>
-                                                    <input type="number" class="form-control" id="distance_km" name="{{ form.distance_km.html_name }}" min="0" value="{{ form.distance_km.value|default:'' }}">
-                                                </div>
-                                            </div>
-                                            
-                                            <div class="row">
-                                                <div class="col-md-9 mb-3">
-                                                    <label class="form-label">Exercise Notes</label>
-                                                        <textarea class="form-control" id="exercise_notes" name="{{ form.notes.html_name }}" rows="2">{{ form.notes.value|default:'' }}</textarea>
-                                                </div>
-                                            </div>
-                                            
+                            <div class="card-body">                  
+                                <div id="exercises-forms-container">  
+                                    <!--First Row-->
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Exercise * {{exercise_form.exercise.value}}</label>
+                                            <select class="form-select" aria-label="Choose an exercise" id="exercise_name" name="{{ exercise_form.exercise.html_name }}" required onchange="loadSelectedExercise(this)">
+                                                <option value="" selected disabled>Choose an exercise</option>
+                                                {% for exercise in exercises %}
+                                                    <option value="{{ exercise.id }}" {% if exercise_form.exercise.value == exercise.exercise_id %}selected{% endif %}>
+                                                        {{ exercise.name }}
+                                                    </option>
+                                                {% endfor %}
+                                            </select>
                                         </div>
+                                        <div class="col-md-3 mb-3">
+                                            <label class="form-label">Duration (minutes)</label>
+                                            <input type="number" class="form-control" id="duration_minutes" name="{{ exercise_form.duration_minutes.html_name }}" min="0" value="{{ exercise_form.duration_minutes.value}}">
+                                        </div>
+                                    </div>
+                                    <!--Second Row-->
+                                    <div class="row">
+                                        <div class="col-md-3 mb-3">
+                                            <label class="form-label">Sets *</label>
+                                            <input type="number" class="form-control" id="sets" name="{{ exercise_form.sets.html_name }}" min="1" value="{{ exercise_form.sets_completed.value }}">
+                                        </div>
+                                        
+                                        <div class="col-md-3 mb-3">
+                                            <label class="form-label">Reps *</label>
+                                            <input type="number" class="form-control" id="reps" name="{{ exercise_form.reps.html_name }}" min="1" value="{{ exercise_form.reps_completed.value }}">
+                                        </div>
+                                        
+                                        <div class="col-md-3 mb-3" id="weight_kg_div">
+                                            <label class="form-label">Weight (kg)</label>
+                                            <input type="number" class="form-control" id="weight_kg" name="{{ exercise_form.weight_kg.html_name }}" min="0" value="{{ exercise_form.weight_kg.value }}">
+                                        </div>
+                                        
+                                        <div class="col-md-3 mb-3" id="distance_km_div">
+                                            <label class="form-label">Distance (km)</label>
+                                            <input type="number" class="form-control" id="distance_km" name="{{ exercise_form.distance_km.html_name }}" min="0" value="{{ exercise_form.distance_km.value|default:'' }}">
+                                        </div>
+                                    </div>
+                                    <!--Third Row-->
+                                    <div class="row">
+                                        <div class="col-md-9 mb-3">
+                                            <label class="form-label">Exercise Notes</label>
+                                                <textarea class="form-control" id="exercise_notes" name="{{ exercise_form.notes.html_name }}" rows="2">{{ exercise_form.notes.value|default:'' }}</textarea>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        
+                    
                         <!-- Action Buttons -->
                         <div class="d-flex justify-content-center gap-2 mt-4">
-                            <a href="{% url 'dashboard' %}" class="btn btn-secondary btn-md">
-                               <i class="bi bi-arrow-left"></i> Cancel
+                            <a href="{% url 'workout-session-list' %}" class="btn btn-secondary btn-md">
+                            <i class="bi bi-arrow-left"></i> Cancel
                             </a>
-                            <button type="button" class="btn btn-primary btn-md" onclick="createWorkoutSession()">
-                                <i class="bi bi-save"></i> Create Workout Session
+                            <button type="button" class="btn btn-primary btn-md" onclick="updateWorkoutSession(event)">
+                                <i class="bi bi-save"></i> Update Workout Session
                             </button>
                         </div>
                     </div>
                 </form>
-                
             </div>
         </div>
     </div>
 </div>
 
 <script>
-
+let session_id = {{session_id}}
 window.show_toast = function(message) {
     // Check if toast element exists
     if ($('#liveToast').length) {
-        $('#toast-body').text(message);
+        $('#toast-body').html(message);
         var toast = new bootstrap.Toast(document.getElementById('liveToast'));
         toast.show();
     } else {
@@ -191,6 +184,14 @@ window.show_toast = function(message) {
     }
 }
 
+$(document).ready(function() {
+    $('#staticBackdrop').on('hidden.bs.modal', function (e) {
+       //location.reload();
+        console.log("workout-session-list")
+        window.location.href = "{% url 'workout-session-list' %}";
+    });
+    });
+    
 window.show_modal = function(title, body) {
     if ($('#modal-title').length && $('#body-modal').length) {
         $('#modal-title').text(title);
@@ -201,12 +202,6 @@ window.show_modal = function(title, body) {
         myModal.show();
     }
 }
-
-    // Dynamic formset management
-    let formCount = {{ formset.total_form_count }};
-    console.log('Initial form count:', formCount);
-
-    //updateDeleteButtonState(formCount);
 
     function updateDeleteButtonState(count) {
 
@@ -222,71 +217,6 @@ window.show_modal = function(title, body) {
         deleteBtn.classList.add('btn-outline-danger');
     }
     }
-
-    function addExerciseForm() {
-        const container = document.getElementById('exercises-forms-container');
-        const newForm = container.children[0].cloneNode(true);
-        
-        // Clear input values in cloned form
-        newForm.querySelectorAll('input, select, textarea').forEach(input => {
-            if (input.type !== 'hidden' && input.type !== 'checkbox') {
-                input.value = '';
-            }
-            if (input.type === 'checkbox') {
-                input.checked = false;
-            }
-        });
-        
-        // Update IDs and names for the new form
-        const newIndex = formCount;
-        newForm.querySelectorAll('[id*="-"]').forEach(element => {
-            if (element.id) {
-                element.id = element.id.replace(/-(\d+)-/, `-${newIndex}-`);
-            }
-        });
-        
-        newForm.querySelectorAll('[name*="-"]').forEach(element => {
-            if (element.name) {
-                element.name = element.name.replace(/-(\d+)-/, `-${newIndex}-`);
-            }
-        });
-        
-        // Update the heading
-        const heading = newForm.querySelector('h6');
-        if (heading) {
-            heading.textContent = `Exercise #${newIndex + 1}`;
-        }
-        
-        container.appendChild(newForm);
-        formCount++;
-    
-       // updateDeleteButtonState(formCount);
-    }
-function deleteLastExercise() {
-    if (formCount <= 1) {
-        alert('At least one exercise log is required.');
-        return;
-    }
-    
-    const container = document.getElementById('exercises-forms-container');
-    const forms = container.getElementsByClassName('formset-row');
-    
-    if (forms.length > 1) {
-        // Remove the last form
-        const lastForm = forms[forms.length - 1];
-        lastForm.remove();
-        formCount--;
-        
-        // Update the TOTAL_FORMS management field
-        const totalFormsInput = document.getElementById('id_exerciselog_set-TOTAL_FORMS');
-        if (totalFormsInput) {
-            totalFormsInput.value = formCount;
-        }
-
-       // updateDeleteButtonState(formCount);
-    }
-}
-
 
 function validateDate() {
     let sess_date = document.querySelector('#session_date');
@@ -328,7 +258,7 @@ function validateTime() {
 }
 
 
-  function createWorkoutSession(event) {
+  window.updateWorkoutSession = function(event) {
     console.log("form validator")
 
     'use strict'
@@ -381,7 +311,7 @@ function validateTime() {
         console.log("Session Date : "+ session_date+", Start Time : "+ start_time+" , End Time : "+end_time)
         console.log("Exercise Name : "+ exercise_name+", Sets : "+ sets+" , Reps : "+reps+", Weight (kg) : "+ weight_kg+", Duration (minutes) : "+ duration_minutes+", Distance (km) : "+ distance_km+", Exercise Notes : "+ exercise_notes)    
         $.ajax({
-        url: "{% url 'workout-create' %}",
+        url: "{% url 'workout-edit' session_id %}",
         type: "POST",
         contentType: 'application/json',
         data: JSON.stringify({
@@ -394,13 +324,12 @@ function validateTime() {
             },
             exercise_data : {
                 'exercise_name': exercise_name,
-                'sets': sets,
-                'reps': reps,
+                'sets_completed': sets,
+                'reps_completed': reps,
                 'weight_kg': weight_kg,
                 'duration_minutes': duration_minutes,
                 'distance_km': distance_km,
                 'exercise_notes': exercise_notes,
-                  
             },
             'csrfmiddlewaretoken': '{{ csrf_token }}'
         }),
@@ -408,12 +337,42 @@ function validateTime() {
         'X-CSRFToken': '{{ csrf_token }}'  // Alternative CSRF placement
     },
         success: function (response) {
-            show_modal("Workout session created successfully!", "The workout session has been created.");
+            show_modal("Workout session updated successfully!", "The workout session has been updated.");
 
         },
         error: function (xhr, status, error) {
             console.log("AJAX Error:", status, error);
-            show_toast("Error creating workout session. Please try again.");
+        
+        if (xhr.status === 400) {
+            // Validation errors
+            const response = xhr.responseJSON;
+            let errorMessage = "Please fix the following errors:"+`<br>`;
+            
+            if (response.workout_errors) {
+               
+                errorMessage += "Workout Session Errors:&nbsp";
+                for (const [field, errors] of Object.entries(response.workout_errors)) {
+                    errorMessage += `- ${field}: ${errors.join(', ')}\n`;
+                }
+            }
+            
+            if (response.exercise_errors) {
+                 errorMessage += '<br>'
+                errorMessage += "Exercise Errors:&nbsp";
+                for (const [field, errors] of Object.entries(response.exercise_errors)) {
+                    errorMessage += `- ${field}: ${errors.join(', ')}\n`;
+                }
+            }
+            
+            if (response.non_field_errors) {
+                errorMessage += `\n${response.non_field_errors.join('\n')}\n`;
+            }
+            
+            show_toast(errorMessage);
+            
+        } else {
+            show_toast("Error updating workout session. Please try again.");
+        }
         }
         });
          return false;
@@ -451,11 +410,9 @@ function validateTime() {
 
     function loadSelectedExercise(selectElement) {
         const exerciseId = selectElement.value;
-        const formRow = selectElement.closest('.formset-row');
         const exercise_name = selectElement.options[selectElement.selectedIndex].text;
         if (exercise_name) {
             // Optional: Fetch exercise details via AJAX to show recommendations
-            console.log('formRow:', formRow);
             console.log('Selected Exercise ID:', exercise_name);
               $.ajax({
                 type: "GET",

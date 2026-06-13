@@ -98,7 +98,8 @@
                                                     <div class="summary-card p-2 mb-2 rounded-3 shadow-sm">
                                                         <div class="d-flex align-items-center mb-3">
                                                             <i class="fas fa-info-circle fs-4 text-info me-2"></i>
-                                                            <h6 class="mb-0 fw-bold text-info">Session Information</h6>
+                                                            <h6 class="mb-0 fw-bold text-info">Session Information :- </h6>
+                                                            <h6 class="mb-0 fw-bold text-info p-2" id="workout_session_id"></h6>
                                                         </div>
                                                         <div class="row g-3">
                                                             <!-- Session Date -->
@@ -132,8 +133,8 @@
 
                                                     <div class="mb-2 d-flex align-items-center">
                                                         <i class="fas fa-dumbbell fs-5 text-success me-2"></i>
-                                                        <h6 class="fw-bold text-success mb-0">Exercise Logs</h6>
-                                                
+                                                        <h6 class="fw-bold text-success mb-0">Exercise Logs :- </h6>
+                                                        <h6 class="fw-bold text-success mb-0 p-2" id="log_id"></h6>
                                                     </div>
                                                     
                                                         <div class="exercise-item p-2 mb-2 rounded-3 shadow-sm">
@@ -258,6 +259,8 @@
                         $('#duration').text(data.exercise_duration ? data.exercise_duration + ' min' : '-');
                         $('#sets').text(data.sets_completed + '/' + data.sets || '-');
                         $('#reps').text(data.reps_completed + '/' + data.reps || '-');
+                        $('#log_id').text(data.log_id)
+                        $('#workout_session_id').text(data.workout_session_id)
                         if(data.weight_kg){
                             $('#extra_label').text('Weight');
                             $('#extra_value').html(`<i class="fas fa-dumbbell"></i> ${data.weight_kg} kg`);
